@@ -1,0 +1,122 @@
+@extends('layout.master')
+@section('sds_menu_class','menu-open')
+@section('intelligent_class','menu-open')
+@section('search_reason_class','active')
+@section('content')
+<section class="content">
+<section class="content-header">
+      <h1>
+        Search Reason
+      </h1>
+    </section>
+	<div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Reasons</h3>
+              <div class="form" style="margin-top: 20px;">
+              <form class="form-inline" action="">
+      				  <div class="form-group">
+      				    <select class="form-control" name="reason" style="width: 190px;">
+      				    	<option value="">Select</option>
+                    @foreach( $reasons as $reason )
+                    <option value="{{ $reason->sr_category }}" {{ ((request()->reason == $reason->sr_category)? 'selected':'') }}>{{ $reason->sr_reason }}</option>
+                    @endforeach
+      				    </select>
+      				  </div>
+      				  &nbsp;&nbsp;
+      				  <div class="form-group">
+      				    <input type="text" class="form-control" name="from" autocomplete="off" id="from1" placeholder="From Date">
+      				  </div>
+      				  &nbsp;&nbsp;
+      				  <div class="form-group">
+      				    <input type="text" class="form-control" name="to" autocomplete="off" id="from2" placeholder="To Date">
+      				  </div>
+                &nbsp;&nbsp;
+                @if( Auth::user()->au_user_type == 5 )
+                <div class="form-group">
+                  <select class="form-control" name="user">
+                    <option value="">Select</option>
+                    @foreach( $users as $user )
+                    <option value="{{ $user->au_id }}">{{ $user->au_name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                @endif
+      				  &nbsp;&nbsp;
+				        <input type="submit" class="btn btn-info" name="search_findus" value="Search">
+				      </form>
+				     </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>SL</th>
+                    <th>Cus ID</th>
+                    <th>Mobile</th>
+                    <th>Cus Name</th>
+                    <th>Company Name</th>
+                    <th>Location</th>
+                    <th>Reason</th>
+                    <th>Result</th>
+                    <th>Feedback</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach( $find_users as $reason )
+                  <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $reason->qb_serial }}</td>
+                    <td>{{ $reason->qb_mobile }}</td>
+                    <td>{{ $reason->qb_name }}</td>
+                    <td>{{ $reason->qb_company_name }}</td>
+                    <td>{{ $reason->qb_address }}</td>
+                    <td>{{ $reason->reas_info['sr_reason'] }}</td>
+                    <td>
+                      @for( $i=0; $i<$reason->qb_result; $i++ )
+                        <b style="color: green; font-size: 20px;">*</b>
+                      @endfor
+                    </td>
+                    <td>{{ $reason->followinfo['fm_msg'] }}</td>
+                    <td><a href="{{ url('/client_feedback',['id' => $reason->qb_id]) }}" class="btn btn-info btn-sm">Follow Up</a></td>
+                  </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          </section>
+          @endsection
+          @section('custom_script')
+          <script type="text/javascript">
+          $(document).ready(function(){
+            var date = new Date();
+            date.setDate(date.getDate());
+              $( "#from1" ).datepicker({
+                     daysOfWeekHighlighted: "7",
+                     autoclose: true,
+                     todayHighlight: true,
+                   });
+              $( "#to" ).datepicker({
+                     daysOfWeekHighlighted: "7",
+                     todayHighlight: true,
+                   });
+          });
+
+          $(document).ready(function(){
+            var date = new Date();
+            date.setDate(date.getDate());
+              $( "#from2" ).datepicker({
+                     daysOfWeekHighlighted: "7",
+                     autoclose: true,
+                     todayHighlight: true,
+                   });
+              $( "#to" ).datepicker({
+                     daysOfWeekHighlighted: "7",
+                     todayHighlight: true,
+                   });
+          });
+          </script>
+          @endsection

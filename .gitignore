@@ -1,0 +1,43 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+
+bootstrap/compiled.php
+app/storage/
+
+storage/*.key
+.env
+Homestead.yaml
+Homestead.json
+/.vagrant
+.phpunit.result.cache
+
+# ---- kept off GitHub (secrets, personal data, uploads, logs, big files) ----
+# settings with passwords and keys (only the empty template goes up)
+.env.*
+!.env.example
+
+# libraries: restored with "composer install" / "npm install"
+/vendor/
+
+# database dumps in the project root (the schema files in database/ are kept)
+/*.sql
+*.sql.gz
+
+# archives and logs
+*.zip
+*.rar
+error_log
+*.log
+Thumbs.db
+.DS_Store
+
+# files people uploaded: photos, documents, logos, signatures
+/asset/image/
+/public/asset/image/
+/public/assets/image/
+/public/uploads/
+/public/profile/
+
+# documents the ERP generated (invoices, quotations, reports)
+/assets/data/pdf/

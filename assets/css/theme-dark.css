@@ -1,0 +1,303 @@
+/*
+ * Dark mode for the whole ERP (header moon / sun button). Only applies while <html data-theme="dark">.
+ * The brand colours (green sidebar, red / green buttons, Theme Colors) are left as they are;
+ * only page and panel backgrounds, text and borders change. Printing always stays light.
+ */
+@media screen {
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --erp-dark-page: #0f1311;
+    --erp-dark-surface: #181e1b;
+    --erp-dark-raised: #202824;
+    --erp-dark-input: #121714;
+    --erp-dark-line: #2e3833;
+    --erp-dark-text: #e3e8e5;
+    --erp-dark-muted: #9eaaa4;
+    --erp-dark-link: #5fcf8d;
+
+    /* theme tokens that are surfaces or text */
+    --erp-page: var(--erp-dark-page);
+    --erp-white: var(--erp-dark-surface);
+    --erp-text: var(--erp-dark-text);
+    --erp-black: var(--erp-dark-text);
+    --erp-on-black: #141a17;
+    --erp-muted: var(--erp-dark-muted);
+    --erp-border: var(--erp-dark-line);
+    --erp-green-tint: #1c2b23;
+    --erp-alert-success-text: #a6e6bf;
+    --erp-alert-success-bg: #142a1e;
+    --erp-alert-success-border: #275a3d;
+    --erp-alert-danger-text: #f5b1b4;
+    --erp-alert-danger-bg: #2d1518;
+    --erp-alert-danger-border: #5c2a2e;
+    --erp-selection: #2f6b4a;
+    /* chart colour for Expenses: black would vanish on dark panels */
+    --erp-chart-expense: #c9d1cc;
+}
+
+/* ---------- page, text, headings ---------- */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .wrapper,
+html[data-theme="dark"] .content-wrapper,
+html[data-theme="dark"] .right-side {
+    color: var(--erp-dark-text);
+    background-color: var(--erp-dark-page);
+}
+html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+html[data-theme="dark"] h4, html[data-theme="dark"] h5, html[data-theme="dark"] h6,
+html[data-theme="dark"] label, html[data-theme="dark"] .control-label,
+html[data-theme="dark"] legend, html[data-theme="dark"] caption,
+html[data-theme="dark"] p, html[data-theme="dark"] dt, html[data-theme="dark"] dd,
+html[data-theme="dark"] th, html[data-theme="dark"] td, html[data-theme="dark"] li {
+    color: inherit;
+}
+html[data-theme="dark"] .panel-title, html[data-theme="dark"] .panel-title h4,
+html[data-theme="dark"] .content-header h1, html[data-theme="dark"] .modal-title {
+    color: var(--erp-dark-text);
+}
+/* plain links only (not buttons, labels, card footers, menus or the sidebar) */
+html[data-theme="dark"] .content a:not(.btn):not(.label):not(.badge):not(.small-box-footer):not([class*="paginate_button"]),
+html[data-theme="dark"] .modal a:not(.btn):not(.label):not(.badge) { color: var(--erp-dark-link); }
+html[data-theme="dark"] .content a:not(.btn):not(.label):not(.badge):not(.small-box-footer):not([class*="paginate_button"]):hover,
+html[data-theme="dark"] .modal a:not(.btn):not(.label):not(.badge):hover { color: #8be0ad; }
+html[data-theme="dark"] .text-muted { color: var(--erp-dark-muted) !important; }
+html[data-theme="dark"] .help-block, html[data-theme="dark"] small { color: var(--erp-dark-muted); }
+html[data-theme="dark"] hr { border-top-color: var(--erp-dark-line); }
+html[data-theme="dark"] .text-success { color: #5fcf8d !important; }
+html[data-theme="dark"] .text-danger { color: #f47c81 !important; }
+html[data-theme="dark"] ::selection { color: #ffffff; background: var(--erp-selection); }
+
+/* ---------- header, footer ---------- */
+html[data-theme="dark"] .main-header .navbar,
+html[data-theme="dark"] .main-footer { background-color: var(--erp-dark-surface); color: var(--erp-dark-text); }
+html[data-theme="dark"] .main-header .logo,
+html[data-theme="dark"] .main-header .logo:hover { background-color: var(--erp-dark-surface) !important; border-right-color: var(--erp-dark-line); }
+html[data-theme="dark"] .main-header .navbar .nav > li > a,
+html[data-theme="dark"] .main-header .sidebar-toggle { color: var(--erp-dark-text); }
+html[data-theme="dark"] .main-header .navbar .nav > li > a:hover { background: var(--erp-dark-raised); }
+html[data-theme="dark"] .main-header .navbar-custom-menu .nav > li > a,
+html[data-theme="dark"] .main-header .navbar-custom-menu .nav > li > a:focus { background-color: var(--erp-dark-raised); border-color: var(--erp-dark-line); color: var(--erp-dark-text); }
+html[data-theme="dark"] .main-header .navbar-custom-menu .nav > li > a:hover { background-color: #2a3530; }
+/* the base theme draws each header icon on its own light tile */
+html[data-theme="dark"] .navbar-custom-menu .navbar-nav > li > a > i { color: var(--erp-dark-text); background-color: var(--erp-dark-raised); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .notice-container + * , html[data-theme="dark"] .breadcrumb { background-color: transparent; }
+
+/* ---------- panels, boxes, wells, tabs ---------- */
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .panel-bd,
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .well,
+html[data-theme="dark"] .thumbnail,
+html[data-theme="dark"] .list-group-item,
+html[data-theme="dark"] .jumbotron {
+    color: var(--erp-dark-text);
+    background-color: var(--erp-dark-surface);
+    border-color: var(--erp-dark-line);
+}
+html[data-theme="dark"] .panel > .panel-heading,
+html[data-theme="dark"] .panel-default > .panel-heading,
+html[data-theme="dark"] .panel-footer,
+html[data-theme="dark"] .box-header,
+html[data-theme="dark"] .box-footer {
+    color: var(--erp-dark-text);
+    background-color: var(--erp-dark-surface);
+    border-color: var(--erp-dark-line);
+}
+html[data-theme="dark"] .nav-tabs { border-bottom-color: var(--erp-dark-line); }
+html[data-theme="dark"] .nav-tabs > li > a:hover { background: var(--erp-dark-raised); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .nav-tabs > li.active > a,
+html[data-theme="dark"] .nav-tabs > li.active > a:hover,
+html[data-theme="dark"] .nav-tabs > li.active > a:focus { color: var(--erp-dark-text); background: var(--erp-dark-surface); border-color: var(--erp-dark-line) var(--erp-dark-line) transparent; }
+html[data-theme="dark"] .tab-content { background: transparent; }
+
+/* ---------- forms ---------- */
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] input[type="text"], html[data-theme="dark"] input[type="number"],
+html[data-theme="dark"] input[type="email"], html[data-theme="dark"] input[type="password"],
+html[data-theme="dark"] input[type="date"], html[data-theme="dark"] input[type="search"],
+html[data-theme="dark"] input[type="tel"], html[data-theme="dark"] input[type="month"],
+html[data-theme="dark"] select, html[data-theme="dark"] textarea {
+    color: var(--erp-dark-text);
+    background-color: var(--erp-dark-input);
+    border-color: var(--erp-dark-line);
+}
+html[data-theme="dark"] .form-control::placeholder,
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: #6f7c75; }
+html[data-theme="dark"] .form-control[disabled],
+html[data-theme="dark"] .form-control[readonly],
+html[data-theme="dark"] fieldset[disabled] .form-control { color: var(--erp-dark-muted); background-color: #1c2320; }
+html[data-theme="dark"] .form-control:focus { border-color: var(--erp-green, #12a852); box-shadow: 0 0 0 2px rgba(18, 168, 82, .25); }
+html[data-theme="dark"] .input-group-addon { color: var(--erp-dark-text); background-color: var(--erp-dark-raised); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] select option { color: var(--erp-dark-text); background-color: var(--erp-dark-surface); }
+html[data-theme="dark"] .has-error .form-control { border-color: #f47c81; }
+html[data-theme="dark"] .has-error .control-label, html[data-theme="dark"] .has-error .help-block { color: #f47c81; }
+
+/* ---------- buttons that are white in light mode ---------- */
+html[data-theme="dark"] .btn-default {
+    color: var(--erp-dark-text);
+    background-color: var(--erp-dark-raised);
+    border-color: #3a4640;
+}
+html[data-theme="dark"] .btn-default:hover,
+html[data-theme="dark"] .btn-default:focus { color: #ffffff; background-color: #2a3530; border-color: #4a5a52; }
+html[data-theme="dark"] .btn-success.btn-outline,
+html[data-theme="dark"] .btn-warning { background-color: transparent; }
+html[data-theme="dark"] .btn-success.btn-outline { color: var(--erp-dark-link); border-color: var(--erp-dark-link); }
+html[data-theme="dark"] .close { color: var(--erp-dark-text); text-shadow: none; opacity: .7; }
+
+/* ---------- tables, DataTables, pagination ---------- */
+html[data-theme="dark"] .table { color: var(--erp-dark-text); background-color: transparent; }
+html[data-theme="dark"] .table > thead > tr > th,
+html[data-theme="dark"] .table > tbody > tr > th,
+html[data-theme="dark"] .table > tfoot > tr > th,
+html[data-theme="dark"] .table > thead > tr > td,
+html[data-theme="dark"] .table > tbody > tr > td,
+html[data-theme="dark"] .table > tfoot > tr > td { border-color: var(--erp-dark-line) !important; }
+html[data-theme="dark"] .table > thead > tr > th { color: var(--erp-dark-text); background-color: #1c2b23; }
+html[data-theme="dark"] .table-bordered { border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) { background-color: rgba(255, 255, 255, .025); }
+html[data-theme="dark"] .table-hover > tbody > tr:hover { background-color: rgba(255, 255, 255, .06); }
+html[data-theme="dark"] .table > tbody > tr.active > td, html[data-theme="dark"] .table > tbody > tr > td.active { background-color: var(--erp-dark-raised); }
+html[data-theme="dark"] .dataTables_wrapper .dataTables_info,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_length,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_filter { color: var(--erp-dark-muted); }
+html[data-theme="dark"] table.dataTable tbody tr { background-color: transparent; }
+html[data-theme="dark"] .pagination > li > a,
+html[data-theme="dark"] .pagination > li > span,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--erp-dark-text) !important; background: var(--erp-dark-surface); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .pagination > .disabled > a,
+html[data-theme="dark"] .pagination > .disabled > span { color: #6f7c75 !important; background: var(--erp-dark-surface); }
+html[data-theme="dark"] .pagination > .active > a,
+html[data-theme="dark"] .pagination > .active > span,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current { color: #ffffff !important; background: var(--erp-green-btn, #0e8a43) !important; border-color: var(--erp-green-btn, #0e8a43) !important; }
+
+/* ---------- dropdowns, modals, popovers, tooltips ---------- */
+html[data-theme="dark"] .dropdown-menu { background-color: var(--erp-dark-raised); border-color: var(--erp-dark-line); box-shadow: 0 8px 20px rgba(0, 0, 0, .5); }
+html[data-theme="dark"] .dropdown-menu > li > a { color: var(--erp-dark-text); }
+html[data-theme="dark"] .dropdown-menu > li > a:hover,
+html[data-theme="dark"] .dropdown-menu > li > a:focus { color: #ffffff; background-color: #2a3530; }
+html[data-theme="dark"] .dropdown-menu .divider { background-color: var(--erp-dark-line); }
+html[data-theme="dark"] .modal-content { color: var(--erp-dark-text); background-color: var(--erp-dark-surface); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .modal-header, html[data-theme="dark"] .modal-footer { border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .modal-backdrop.in { opacity: .7; }
+html[data-theme="dark"] .popover { color: var(--erp-dark-text); background: var(--erp-dark-raised); border-color: var(--erp-dark-line); }
+
+/* ---------- select2 ---------- */
+html[data-theme="dark"] .select2-container--default .select2-selection--single,
+html[data-theme="dark"] .select2-container--default .select2-selection--multiple { background-color: var(--erp-dark-input); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__rendered { color: var(--erp-dark-text); }
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #6f7c75; }
+html[data-theme="dark"] .select2-dropdown { color: var(--erp-dark-text); background-color: var(--erp-dark-raised); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .select2-container--default .select2-search--dropdown .select2-search__field { color: var(--erp-dark-text); background: var(--erp-dark-input); border-color: var(--erp-dark-line); }
+html[data-theme="dark"] .select2-container--default .select2-results__option[aria-selected="true"] { background-color: #2a3530; }
+html[data-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected] { color: #ffffff; background-color: var(--erp-green-btn, #0e8a43); }
+
+/* ---------- date picker ---------- */
+html[data-theme="dark"] .ui-datepicker { background: var(--erp-dark-raised) !important; border-color: var(--erp-dark-line) !important; }
+html[data-theme="dark"] .ui-datepicker .ui-datepicker-calendar .ui-state-default { color: var(--erp-dark-text) !important; background: var(--erp-dark-raised) !important; }
+html[data-theme="dark"] .ui-datepicker .ui-datepicker-calendar .ui-state-hover,
+html[data-theme="dark"] .ui-datepicker .ui-datepicker-calendar a.ui-state-default:hover { background: #2a3530 !important; }
+html[data-theme="dark"] .ui-datepicker .ui-datepicker-calendar .ui-state-highlight { color: var(--erp-dark-link) !important; border-color: var(--erp-dark-link) !important; }
+html[data-theme="dark"] .ui-datepicker .ui-datepicker-calendar .ui-state-active { color: #ffffff !important; background: var(--erp-green-btn, #0e8a43) !important; }
+html[data-theme="dark"] .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current { color: var(--erp-dark-text) !important; background: var(--erp-dark-surface) !important; border-color: var(--erp-dark-line) !important; }
+html[data-theme="dark"] .ui-widget-content { color: var(--erp-dark-text); background: var(--erp-dark-raised); border-color: var(--erp-dark-line); }
+
+/* ---------- alerts, labels, progress ---------- */
+html[data-theme="dark"] .alert-warning { color: #f3d58a; background-color: #2c2512; border-color: #5a4a1f; }
+html[data-theme="dark"] .alert-info { color: #9fd3f2; background-color: #12232d; border-color: #24485c; }
+html[data-theme="dark"] .label-default { color: #ffffff; background-color: #4a5650; }
+html[data-theme="dark"] .progress { background-color: var(--erp-dark-raised); }
+
+/* ---------- pages that paint white or black inline ---------- */
+html[data-theme="dark"] .content [style*="background-color: #fff"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="background-color:#fff"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #fff"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="background:#fff"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: white"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="background-color:white"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: white"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="background:white"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: rgb(255, 255, 255)"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f5f5f5"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f5f5f5"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f5f5f5"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f5f5f5"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f9f9f9"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f9f9f9"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f9f9f9"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f9f9f9"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #fafafa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#fafafa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #fafafa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#fafafa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f8f9fa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f8f9fa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f8f9fa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f8f9fa"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f8f8f8"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f8f8f8"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f8f8f8"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f8f8f8"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f1f1f1"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f1f1f1"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f1f1f1"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f1f1f1"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f2f2f2"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f2f2f2"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f2f2f2"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f2f2f2"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f4f4f4"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f4f4f4"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f4f4f4"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f4f4f4"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f7f7f7"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f7f7f7"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f7f7f7"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f7f7f7"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #eee;"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#eee;"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #eee;"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#eee;"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #eeeeee"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#eeeeee"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #eeeeee"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#eeeeee"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #efefef"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#efefef"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #efefef"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#efefef"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color: #f0f0f0"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background-color:#f0f0f0"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background: #f0f0f0"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="background:#f0f0f0"]:not(.erp-keep-colors) {
+    background-color: var(--erp-dark-surface) !important;
+}
+html[data-theme="dark"] .content [style*="color: #000"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="color:#000"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="color: black"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="color:black"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="color: #333"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="color:#333"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="color: #222"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="color:#222"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="color: #444"]:not(.erp-keep-colors), html[data-theme="dark"] .content [style*="color: #555"]:not(.erp-keep-colors),
+html[data-theme="dark"] .content [style*="color: rgb(0, 0, 0)"]:not(.erp-keep-colors) {
+    color: var(--erp-dark-text) !important;
+}
+
+/* ---------- totals rows, money in / out, dialog title bars ---------- */
+html[data-theme="dark"] .table > tfoot > tr > th,
+html[data-theme="dark"] .table > tfoot > tr > td { color: var(--erp-dark-text); background-color: var(--erp-dark-raised) !important; }
+html[data-theme="dark"] .amount-out, html[data-theme="dark"] .text-red, html[data-theme="dark"] .debit { color: #f58b90 !important; }
+html[data-theme="dark"] .amount-in, html[data-theme="dark"] .text-green, html[data-theme="dark"] .credit { color: #6fd79a !important; }
+html[data-theme="dark"] .modal-header,
+html[data-theme="dark"] .modal-footer { background-color: var(--erp-dark-surface); }
+
+/* ---------- dashboard bits ---------- */
+html[data-theme="dark"] .dash-month-table th { color: var(--erp-dark-muted); }
+html[data-theme="dark"] .canvasjs-chart-credit { color: #6f7c75 !important; }
+
+/* ---------- light / dark button ---------- */
+html[data-theme="dark"] .navbar-custom-menu .navbar-nav > li > a#erpModeToggle > i { color: #f5c542; }
+
+} /* @media screen */
+
+/* the button itself, both modes */
+#erpModeToggle { font-size: 18px; }
+#erpModeToggle i { transition: transform .2s; }
+#erpModeToggle:hover i { transform: rotate(-15deg); }

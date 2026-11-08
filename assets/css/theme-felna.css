@@ -1,0 +1,694 @@
+/* ==========================================================================
+   FelnaTech theme: red, green and white (logo colours); Arial Black only for page titles and card numbers.
+   Loaded after every other stylesheet (layouts/head.blade.php), so it only overrides.
+   ========================================================================== */
+
+:root {
+    --erp-red: #e8202a;          /* logo red */
+    --erp-red-dark: #c4161f;
+    --erp-green: #12a852;        /* logo green (accents, borders) */
+    --erp-green-btn: #0e8a43;    /* green that keeps white text readable */
+    --erp-green-btn-dark: #0b7238;
+    --erp-green-dark: #0a4a26;   /* sidebar */
+    --erp-green-darker: #073a1d; /* sidebar submenus */
+    --erp-green-hover: #0f5d31;
+    --erp-green-tint: #eaf7ef;
+    --erp-green-light: #36a22a;      /* IGL Group logo light green */
+    --erp-green-light-dark: #2a8420; /* same hue, dark enough for white text */
+    --erp-black: #2b2f2c;        /* soft black: easier on the eyes than pure #000 */
+    --erp-text: #2b2f2c;
+    --erp-muted: #5f6b64;
+    --erp-border: #dce5df;
+    --erp-page: #eef2ef;         /* slightly dimmed page so white panels don't glare */
+    /* Large colour blocks (summary cards) use deeper, calmer shades of the logo colours */
+    --erp-block-green: #1b7d47;
+    --erp-block-red: #c8323a;
+    /* Readable text on each themed colour (the Theme Colors page recalculates these) */
+    --erp-green-rgb: 18, 168, 82; /* --erp-green as r, g, b for see-through glows */
+    --erp-selection: #b8e5cb;      /* selected text background: light tint of the main colour */
+    --erp-on-primary: #ffffff;
+    --erp-on-accent: #ffffff;
+    --erp-on-sidebar: #ffffff;
+    --erp-on-block-green: #ffffff;
+    --erp-on-block-red: #ffffff;
+    --erp-on-black: #ffffff;
+    --erp-on-search: #1a1a1a;
+    --erp-on-search-hover: #ffffff;
+    --erp-sidebar-text: rgba(255, 255, 255, .88);
+    --erp-sidebar-sub-text: rgba(255, 255, 255, .8);
+    --erp-sidebar-strong: #ffffff;
+    --erp-sidebar-line: rgba(255, 255, 255, .15);
+    --erp-sidebar-scroll: rgba(255, 255, 255, .45);
+    --erp-alert-success-text: #1e5c37;
+    --erp-alert-success-bg: #e8f5ec;
+    --erp-alert-success-border: #b9e2c8;
+    --erp-alert-danger-text: #8c1d22;
+    --erp-alert-danger-bg: #fbeaea;
+    --erp-alert-danger-border: #f1c3c5;
+    --erp-white: #ffffff;
+    /* Dashboard chart colours: green, red, light blue, black (+ dark blue, light green). Every pair
+       stays tellable apart with colour blindness; each figure keeps its colour on every chart. */
+    --erp-chart-sales: #12a852;
+    --erp-chart-purchase: #c4161f;
+    --erp-chart-expense: #2b2f2c;
+    --erp-chart-salary: #4fb3e8;
+    --erp-chart-service: #1c5cab;
+    --erp-chart-collected: #8fdcae;
+    /* Dashboard activity panel (dark): status colours, not changed by Theme Colors */
+    --erp-dash-ok: #12a852;
+    --erp-dash-ok-rgb: 18, 168, 82;
+    --erp-dash-ok-dark: #0b7238;
+    --erp-dash-bad: #e8202a;
+    --erp-dash-bad-rgb: 232, 32, 42;
+    --erp-dash-late: #ff8a8f;
+    --erp-dash-late-rgb: 255, 138, 143;
+    --erp-dash-info: #ffffff;
+    --erp-dash-info-rgb: 255, 255, 255;
+    --erp-dash-title: #e8202a;
+    --erp-dash-in: #9ff0c0;
+    --erp-dash-out: #ff9aa0;
+    --erp-font: Arial, Helvetica, sans-serif;
+    --erp-font-heading: "Arial Black", "Arial Bold", Gadget, Arial, sans-serif;
+}
+
+/* ---------- Base ---------- */
+body,
+.main-sidebar,
+.main-header .navbar .nav > li > a > .label,
+.form-control,
+.table,
+.select2-container,
+.ui-widget {
+    font-family: var(--erp-font);
+}
+body {
+    color: var(--erp-text);
+    background-color: var(--erp-page);
+}
+.content-wrapper,
+.right-side {
+    background-color: var(--erp-page);
+}
+a {
+    color: var(--erp-green-btn);
+}
+a:hover,
+a:focus {
+    color: var(--erp-green-btn-dark);
+}
+.text-muted { color: var(--erp-muted) !important; } /* the base theme forced a pale #9a9a9a (2.7:1) */
+.text-success { color: var(--erp-green-btn) !important; }
+.text-danger { color: var(--erp-red) !important; }
+
+/* Arial Black only where a heavy face helps: the page title and the big card numbers.
+   Everything else (menu, buttons, table headers, panel titles) is Arial bold, which is easier to read. */
+.content-header h1,
+.small-box h3 {
+    font-family: var(--erp-font-heading);
+    font-weight: 900;
+    letter-spacing: 0;
+}
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.panel-title,
+.box-title,
+.modal-title,
+.btn,
+.dt-button,
+.table > thead > tr > th,
+.table > tfoot > tr > th,
+.sidebar-menu > li > a,
+.sidebar-menu .treeview-menu > li > a,
+.user-panel .info p {
+    font-family: var(--erp-font);
+    font-weight: 700;
+    letter-spacing: 0;
+}
+h1 small, h2 small, h3 small, h4 small, .h1 small, .h3 small {
+    font-family: var(--erp-font);
+    font-weight: normal;
+    color: var(--erp-muted);
+}
+
+/* ---------- Header ---------- */
+.main-header .logo,
+.main-header .logo:hover {
+    background-color: var(--erp-white) !important;
+    border-right: 1px solid var(--erp-border);
+}
+.main-header .navbar {
+    background-color: var(--erp-white);
+    border-bottom: 3px solid var(--erp-green);
+}
+.main-header .sidebar-toggle {
+    color: var(--erp-green-btn);
+    border-right-color: var(--erp-border);
+}
+.main-header .sidebar-toggle:hover {
+    color: var(--erp-red);
+}
+
+/* ---------- Sidebar (dark green) ---------- */
+.main-sidebar,
+.left-side {
+    background-color: var(--erp-green-dark);
+}
+.user-panel .info,
+.user-panel .info p,
+.user-panel .info a {
+    color: var(--erp-sidebar-strong);
+}
+.user-panel .image img {
+    border-color: var(--erp-sidebar-scroll);
+}
+.sidebar-form {
+    border-color: var(--erp-green-darker);
+}
+.sidebar-form .btn,
+.sidebar-form input[type=text] {
+    background-color: var(--erp-white);
+}
+.sidebar-menu > li > a {
+    color: var(--erp-sidebar-text);
+    font-size: 14px;
+}
+/* Every menu icon sits in the same 22px box (the icons come from three icon sets with different widths),
+   so all menu names start in one straight line; flex also drops the stray spaces before the names */
+.sidebar-menu > li > a {
+    display: flex;
+    align-items: center;
+}
+.sidebar-menu > li > a > i:first-child {
+    flex: 0 0 22px;
+    width: 22px;
+    margin-right: 10px;
+    text-align: center;
+    font-size: 16px;
+}
+.sidebar-menu > li.active > a,
+.sidebar-menu > li:hover > a,
+.sidebar-menu > li.menu-open > a {
+    color: var(--erp-sidebar-strong);
+    background: var(--erp-green-hover);
+}
+.sidebar-menu > li.active > a:before {
+    background: var(--erp-red);
+    width: 4px;
+}
+.sidebar-menu .treeview-menu {
+    background-color: var(--erp-green-darker);
+}
+.sidebar-menu .treeview-menu > li > a {
+    color: var(--erp-sidebar-sub-text);
+    font-size: 13px;
+}
+.sidebar-menu .treeview-menu > li.active > a,
+.sidebar-menu .treeview-menu > li:hover > a {
+    color: var(--erp-sidebar-strong);
+}
+.sidebar-menu .treeview-menu > li.active > a {
+    border-left: 3px solid var(--erp-red);
+    margin-left: -3px;
+}
+.sidebar-menu .treeview-menu:before,
+.sidebar-menu .treeview-menu > li::before {
+    border-color: var(--erp-sidebar-line);
+    background: var(--erp-sidebar-line);
+}
+.slimScrollBar {
+    background: var(--erp-sidebar-scroll) !important;
+}
+
+/* ---------- Page header and panels ---------- */
+.content-header {
+    background-color: var(--erp-white);
+    border-bottom: 2px solid var(--erp-green-tint);
+}
+.content-header h1 {
+    color: var(--erp-black);
+}
+.panel,
+.panel-bd {
+    border-color: var(--erp-border);
+}
+.panel-bd > .panel-heading {
+    color: var(--erp-black);
+    background-color: var(--erp-white);
+    border-bottom: 2px solid var(--erp-green-tint);
+}
+.panel-bd .panel-heading::before {
+    border-top-color: var(--erp-red);
+}
+.panel-primary > .panel-heading,
+.panel-success > .panel-heading {
+    color: var(--erp-on-primary);
+    background-color: var(--erp-green-btn);
+    border-color: var(--erp-green-btn);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+    font-size: 13px;
+    border-radius: 4px;
+}
+.btn-success,
+.btn-primary {
+    color: var(--erp-on-primary);
+    background-color: var(--erp-green-btn);
+    border-color: var(--erp-green-btn-dark);
+}
+.btn-success:hover, .btn-success:focus, .btn-success:active,
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    color: var(--erp-on-primary);
+    background-color: var(--erp-green-btn-dark);
+    border-color: var(--erp-green-btn-dark);
+}
+.btn-primary {
+    color: var(--erp-on-sidebar);
+    background-color: var(--erp-green-dark);
+    border-color: var(--erp-green-darker);
+}
+/* Search / filter buttons in the IGL light green. Black text: white on this green is too faint (3.3:1),
+   black reads well (5.3:1); on hover the darker shade carries white text (4.75:1). */
+.btn-info,
+.filterbutton,
+#search-form .btn,
+.igl-btn.igl-btn-search {
+    color: var(--erp-on-search) !important;
+    background-color: var(--erp-green-light) !important;
+    border-color: var(--erp-green-light-dark) !important;
+}
+.btn-info:hover, .btn-info:focus, .btn-info:active,
+.filterbutton:hover, .filterbutton:focus,
+#search-form .btn:hover, #search-form .btn:focus,
+.igl-btn.igl-btn-search:hover {
+    color: var(--erp-on-search-hover) !important;
+    background-color: var(--erp-green-light-dark) !important;
+    border-color: var(--erp-green-light-dark) !important;
+}
+#search-form .form-control {
+    border-color: var(--erp-green-light);
+}
+.btn-danger {
+    color: var(--erp-on-accent);
+    background-color: var(--erp-red);
+    border-color: var(--erp-red-dark);
+}
+.btn-danger:hover, .btn-danger:focus, .btn-danger:active {
+    color: var(--erp-on-accent);
+    background-color: var(--erp-red-dark);
+    border-color: var(--erp-red-dark);
+}
+.btn-warning {
+    color: var(--erp-red);
+    background-color: var(--erp-white);
+    border-color: var(--erp-red);
+}
+.btn-warning:hover, .btn-warning:focus, .btn-warning:active {
+    color: var(--erp-on-accent);
+    background-color: var(--erp-red);
+    border-color: var(--erp-red);
+}
+.btn-default {
+    color: var(--erp-black);
+    background-color: var(--erp-white);
+    border-color: #c9d3cd;
+}
+.btn-default:hover, .btn-default:focus {
+    background-color: var(--erp-green-tint);
+    border-color: var(--erp-green);
+}
+/* Bootstrap order: when a button has btn-default AND a colour class (step wizards switch them),
+   the colour wins */
+.btn-default.btn-primary { color: var(--erp-on-sidebar); background-color: var(--erp-green-dark); border-color: var(--erp-green-darker); }
+.btn-default.btn-success { color: var(--erp-on-primary); background-color: var(--erp-green-btn); border-color: var(--erp-green-btn-dark); }
+.btn-default.btn-danger  { color: var(--erp-on-accent); background-color: var(--erp-red); border-color: var(--erp-red-dark); }
+
+/* Header shortcuts (Sale, Customer Receive, ...) */
+.btn-success.btn-outline {
+    color: var(--erp-green-btn);
+    background-color: var(--erp-white);
+    border-color: var(--erp-green-btn);
+}
+.btn-success.btn-outline:hover,
+.btn-success.btn-outline:focus {
+    color: var(--erp-on-accent);
+    background-color: var(--erp-red);
+    border-color: var(--erp-red);
+}
+
+/* ---------- Step wizard (Update Employee: Basic Info, Team Info, Access, Documentation) ---------- */
+.stepwizard .stepwizard-row:before {
+    top: 16px;
+    height: 2px;
+    background: linear-gradient(to right, var(--erp-green-btn) var(--erp-step-progress, 0%), var(--erp-border) var(--erp-step-progress, 0%));
+}
+.stepwizard .btn-circle {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    line-height: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50%;
+    color: var(--erp-muted) !important;
+    background: var(--erp-white) !important;
+    border: 2px solid var(--erp-border) !important;
+    opacity: 1 !important;
+    box-shadow: none;
+}
+.stepwizard .btn-circle.is-done {
+    color: var(--erp-green-btn) !important;
+    border-color: var(--erp-green-btn) !important;
+    font-size: 0;
+}
+.stepwizard .btn-circle.is-done::before {
+    content: "\f00c";
+    font-family: FontAwesome;
+    font-size: 14px;
+}
+.stepwizard .btn-circle.btn-primary {
+    color: var(--erp-on-primary) !important;
+    background: var(--erp-green-btn) !important;
+    border-color: var(--erp-green-btn) !important;
+    box-shadow: 0 0 0 4px var(--erp-green-tint);
+}
+.stepwizard .stepwizard-step p {
+    color: var(--erp-muted);
+    font-weight: 700;
+}
+.stepwizard .stepwizard-step .btn-primary + p,
+.stepwizard .stepwizard-step .is-done + p { color: var(--erp-text); }
+
+/* ---------- Labels, alerts, boxes ---------- */
+/* The theme draws labels with a 2px border in its own colours, so the border follows too */
+.label-success { color: var(--erp-on-primary); background-color: var(--erp-green-btn); border-color: var(--erp-green-btn); }
+.label-danger { color: var(--erp-on-accent); background-color: var(--erp-red); border-color: var(--erp-red); }
+.label-info, .label-primary { color: var(--erp-on-sidebar); background-color: var(--erp-green-dark); border-color: var(--erp-green-dark); }
+.label-warning { color: var(--erp-on-black); background-color: var(--erp-black); border-color: var(--erp-black); }
+.label-default { background-color: #8a958e; border-color: #8a958e; color: var(--erp-white); }
+
+/* Alerts: light tint with a coloured edge instead of a solid bright block */
+.alert-success {
+    color: var(--erp-alert-success-text);
+    background-color: var(--erp-alert-success-bg);
+    border: 1px solid var(--erp-alert-success-border);
+    border-left: 5px solid var(--erp-green-btn);
+}
+.alert-danger {
+    color: var(--erp-alert-danger-text);
+    background-color: var(--erp-alert-danger-bg);
+    border: 1px solid var(--erp-alert-danger-border);
+    border-left: 5px solid var(--erp-red);
+}
+.alert-info {
+    color: var(--erp-green-dark);
+    background-color: var(--erp-green-tint);
+    border-color: var(--erp-green);
+}
+.alert-warning {
+    color: var(--erp-red-dark);
+    background-color: #fdecec;
+    border-color: var(--erp-red);
+}
+.alert .close { color: var(--erp-black); opacity: .5; }
+
+.small-box { border-radius: 6px; }
+.bg-green, .small-box.bg-green { background-color: var(--erp-block-green) !important; color: var(--erp-on-block-green) !important; }
+.bg-red, .small-box.bg-red { background-color: var(--erp-block-red) !important; color: var(--erp-on-block-red) !important; }
+.bg-yellow, .small-box.bg-yellow { background-color: var(--erp-black) !important; color: var(--erp-on-black) !important; }
+.bg-opening, .small-box.bg-opening { background-color: var(--erp-green-dark) !important; color: var(--erp-on-sidebar) !important; }
+/* Dashboard cards (style.css used teal, olive and purple) */
+.bg-pase { background-color: var(--erp-block-red) !important; color: var(--erp-on-block-red) !important; }
+.bg-darkgreen { background-color: var(--erp-green-dark) !important; color: var(--erp-on-sidebar) !important; }
+.bg-bringal { background-color: var(--erp-black) !important; color: var(--erp-on-black) !important; }
+.small-box .small-box-footer { background: rgba(0, 0, 0, .15); color: inherit; opacity: .9; }
+.small-box .small-box-footer:hover { background: rgba(0, 0, 0, .3); color: inherit; opacity: 1; }
+
+/* Dashboard cards in green, light blue, red, black (then green again), by position on the line, so
+   neighbours always differ whichever cards a role sees. White text is 5.4:1 or better on green, red
+   and black; light blue carries dark text (8.2:1). */
+.dash-cards > :nth-child(4n+1) .small-box.dash-card { background-color: #0b7a3b !important; color: #ffffff !important; }
+.dash-cards > :nth-child(4n+2) .small-box.dash-card { background-color: #5bc0eb !important; color: #0b1f2a !important; }
+.dash-cards > :nth-child(4n+3) .small-box.dash-card { background-color: #c4161f !important; color: #ffffff !important; }
+.dash-cards > :nth-child(4n+4) .small-box.dash-card { background-color: #2b2f2c !important; color: #ffffff !important; }
+.dash-cards > :nth-child(4n+2) .small-box.dash-card h3,
+.dash-cards > :nth-child(4n+2) .small-box.dash-card p,
+.dash-cards > :nth-child(4n+2) .small-box.dash-card a,
+.dash-cards > :nth-child(4n+2) .small-box.dash-card .small-box-footer { color: #0b1f2a !important; }
+.dash-cards > :nth-child(4n+2) .small-box.dash-card .icon { color: rgba(11, 31, 42, .18); }
+.dash-cards > :nth-child(4n+2) .small-box.dash-card .small-box-footer { background: rgba(255, 255, 255, .25); }
+.small-box.dash-card .icon { color: rgba(255, 255, 255, .22); }
+/* Dashboard panels: a coloured top edge and corner marker per panel */
+.panel.dash-accent-green     { border-top: 3px solid #0b7a3b; }
+.panel.dash-accent-red       { border-top: 3px solid #c4161f; }
+.panel.dash-accent-black     { border-top: 3px solid #2b2f2c; }
+.panel.dash-accent-lightblue { border-top: 3px solid #4fb3e8; }
+.panel.dash-accent-green     .panel-heading::before { border-top-color: #0b7a3b; }
+.panel.dash-accent-red       .panel-heading::before { border-top-color: #c4161f; }
+.panel.dash-accent-black     .panel-heading::before { border-top-color: #2b2f2c; }
+.panel.dash-accent-lightblue .panel-heading::before { border-top-color: #4fb3e8; }
+/* small colour key beside a figure (matches its slice / line on the charts) */
+.dash-swatch { display: inline-block; width: 10px; height: 10px; margin: 0 7px 0 0; border-radius: 2px; vertical-align: 0; }
+.bar-green { background-color: var(--erp-green-btn) !important; }
+.bar-red { background-color: var(--erp-red) !important; }
+.bar-orange { background-color: var(--erp-black) !important; }
+
+/* ---------- Tables ---------- */
+.table > thead > tr > th,
+.table > tfoot > tr > th {
+    font-size: 12px;
+    color: var(--erp-black);
+    background-color: var(--erp-green-tint);
+    border-bottom: 2px solid var(--erp-green) !important;
+}
+.table > tfoot > tr > th {
+    border-top: 2px solid var(--erp-green) !important;
+    border-bottom: 1px solid var(--erp-border) !important;
+}
+.table-bordered,
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > th,
+.table-bordered > tfoot > tr > td {
+    border-color: var(--erp-border);
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f7faf8;
+}
+.table-hover > tbody > tr:hover {
+    background-color: var(--erp-green-tint);
+}
+
+/* DataTables */
+.dt-button,
+.dt-buttons .btn,
+.btn.prints {
+    color: var(--erp-on-primary) !important;
+    background: var(--erp-green-btn) !important;
+    border-color: var(--erp-green-btn-dark) !important;
+}
+.dt-button:hover,
+.dt-buttons .btn:hover {
+    color: var(--erp-on-accent) !important;
+    background: var(--erp-red) !important;
+    border-color: var(--erp-red) !important;
+}
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover {
+    color: var(--erp-on-primary);
+    background-color: var(--erp-green-btn);
+    border-color: var(--erp-green-btn);
+}
+.pagination > li > a,
+.pagination > li > span {
+    color: var(--erp-green-btn);
+}
+
+/* ---------- Forms ---------- */
+.form-control:focus {
+    border-color: var(--erp-green);
+    box-shadow: 0 0 0 2px rgba(18, 168, 82, .18);
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    color: var(--erp-on-primary);
+    background-color: var(--erp-green-btn);
+}
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--erp-green);
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--erp-green-btn);
+    border-color: var(--erp-green-btn-dark);
+    color: var(--erp-on-primary);
+}
+
+/* jQuery UI date picker: white calendar, theme-coloured header, readable month / year boxes */
+.ui-datepicker {
+    width: 18em;
+    padding: 6px;
+    background: var(--erp-white) !important;
+    border: 1px solid var(--erp-border) !important;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .14);
+    font-family: var(--erp-font);
+    z-index: 1060 !important;
+}
+.ui-datepicker .ui-widget-header,
+.ui-datepicker .ui-datepicker-header {
+    background: var(--erp-green-btn) !important;
+    border: 0 !important;
+    border-radius: 4px;
+    color: var(--erp-on-primary);
+    padding: 5px 0;
+}
+.ui-datepicker .ui-datepicker-title {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin: 0 2.3em;
+    line-height: 26px;
+    font-weight: 700;
+    color: var(--erp-on-primary);
+}
+.ui-datepicker .ui-datepicker-title select {
+    flex: 1 1 50%;
+    width: auto;
+    height: 26px;
+    margin: 0;
+    padding: 0 4px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--erp-text);
+    background: var(--erp-white);
+    border: 0;
+    border-radius: 3px;
+}
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    top: 5px;
+    width: 26px;
+    height: 26px;
+    border: 0 !important;
+    border-radius: 3px;
+    background: transparent !important;
+    cursor: pointer;
+}
+.ui-datepicker .ui-datepicker-prev { left: 5px; }
+.ui-datepicker .ui-datepicker-next { right: 5px; }
+.ui-datepicker .ui-datepicker-prev-hover,
+.ui-datepicker .ui-datepicker-next-hover {
+    top: 5px;
+    background: rgba(255, 255, 255, .2) !important;
+}
+.ui-datepicker .ui-datepicker-prev-hover { left: 5px; }
+.ui-datepicker .ui-datepicker-next-hover { right: 5px; }
+.ui-datepicker .ui-datepicker-prev span,
+.ui-datepicker .ui-datepicker-next span {
+    background: none !important;
+    text-indent: 0;
+    overflow: hidden;
+    width: 26px;
+    height: 26px;
+    margin: 0;
+    left: 0;
+    top: 0;
+    font-size: 0;
+    line-height: 26px;
+    text-align: center;
+}
+.ui-datepicker .ui-datepicker-prev span::before,
+.ui-datepicker .ui-datepicker-next span::before {
+    font-family: FontAwesome;
+    font-size: 18px;
+    color: var(--erp-on-primary);
+}
+.ui-datepicker .ui-datepicker-prev span::before { content: "\f104"; }
+.ui-datepicker .ui-datepicker-next span::before { content: "\f105"; }
+.ui-datepicker .ui-datepicker-prev.ui-state-disabled,
+.ui-datepicker .ui-datepicker-next.ui-state-disabled { opacity: .35; }
+.ui-datepicker table {
+    margin: 4px 0 0;
+    font-size: 13px;
+}
+.ui-datepicker th {
+    padding: 5px 0;
+    color: var(--erp-muted);
+    font-weight: 700;
+    font-size: 12px;
+}
+.ui-datepicker td { padding: 1px; }
+.ui-datepicker .ui-datepicker-calendar .ui-state-default {
+    padding: 5px 0;
+    text-align: center;
+    font-weight: 400;
+    color: var(--erp-text) !important;
+    background: var(--erp-white) !important;
+    border: 1px solid transparent !important;
+    border-radius: 4px;
+}
+.ui-datepicker .ui-datepicker-calendar .ui-state-hover,
+.ui-datepicker .ui-datepicker-calendar a.ui-state-default:hover {
+    background: var(--erp-green-tint) !important;
+    border-color: var(--erp-green) !important;
+}
+/* today */
+.ui-datepicker .ui-datepicker-calendar .ui-state-highlight {
+    font-weight: 700;
+    color: var(--erp-green-btn) !important;
+    border-color: var(--erp-green-btn) !important;
+}
+/* chosen date */
+.ui-datepicker .ui-datepicker-calendar .ui-state-active {
+    font-weight: 700;
+    color: var(--erp-on-primary) !important;
+    background: var(--erp-green-btn) !important;
+    border-color: var(--erp-green-btn) !important;
+}
+.ui-datepicker .ui-datepicker-other-month .ui-state-default,
+.ui-datepicker .ui-datepicker-unselectable .ui-state-default { opacity: .4; }
+.ui-datepicker .ui-datepicker-buttonpane {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0 0;
+    padding: 6px 0 0;
+    background: transparent !important;
+    border-top: 1px solid var(--erp-border) !important;
+}
+.ui-datepicker .ui-datepicker-buttonpane button {
+    float: none;
+    margin: 0;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 4px;
+    opacity: 1;
+    cursor: pointer;
+}
+.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
+    color: var(--erp-text) !important;
+    background: var(--erp-white) !important;
+    border: 1px solid var(--erp-border) !important;
+}
+.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-close {
+    color: var(--erp-on-primary) !important;
+    background: var(--erp-green-btn) !important;
+    border: 1px solid var(--erp-green-btn) !important;
+}
+
+/* Selected text: soft tint with dark text (the base theme used bright #37a000 with white text) */
+::selection { color: #1a1a1a; background: var(--erp-selection); text-shadow: none; }
+::-moz-selection { color: #1a1a1a; background: var(--erp-selection); text-shadow: none; }
+
+/* ---------- Footer ---------- */
+.main-footer {
+    background-color: var(--erp-white);
+    border-top: 3px solid var(--erp-green);
+    color: var(--erp-black);
+}
+.main-footer a {
+    color: var(--erp-red);
+}
