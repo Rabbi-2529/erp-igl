@@ -50,6 +50,12 @@
     </div>
 </div>
 
+@if(!empty($asked) && $can['history'])
+    <div class="alert alert-info"><i class="fa fa-inbox"></i> <b>Asked for by the employee</b> on {{ \Carbon\Carbon::parse($asked->hlq_created_at)->format('d M Y') }}.
+        For: <b>{{ $asked->hlq_purpose }}</b>@if($asked->hlq_addressed_to). Addressed to: <b>{{ $asked->hlq_addressed_to }}</b>@endif @if($asked->hlq_needed_by). Needed by <b>{{ \Carbon\Carbon::parse($asked->hlq_needed_by)->format('d M Y') }}</b>@endif.
+        @if($asked->hlq_note)<br>{{ $asked->hlq_note }}@endif
+        @if($l->hl_status === 'draft' && $asked->hlq_addressed_to)<br><small>Change "To whom it may concern" in the letter text if it should be addressed to them.</small>@endif</div>
+@endif
 @if($l->hl_status === 'draft' && $l->hl_note)
     <div class="alert alert-warning"><b>Sent back:</b> {{ $l->hl_note }}</div>
 @elseif($l->hl_status === 'rejected')

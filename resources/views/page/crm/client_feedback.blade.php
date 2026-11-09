@@ -114,7 +114,7 @@
                 <table class="table table-bordered table-striped table-hover datatable">
                     <tr>
                       <th>Reason</th>
-                      <td >{{ $customer->reas_info['sr_reason'] }}</td>
+                      <td >{{ $customer->reas_info['sr_reason'] ?? 'N/A' }}</td>
                       <th class="hidden-xs">Birth Date</th>
                       <td class="hidden-xs">{{ $customer->qb_birth_date }}</td>
                       <td rowspan="5" align="center">
@@ -141,7 +141,7 @@
                           @endif
                       </td>
                         <th class="hidden-xs">Find Us</th>
-                        <td class="hidden-xs">{{ $customer->find_info['sf_howto'] }}</td>
+                        <td class="hidden-xs">{{ $customer->find_info['sf_howto'] ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Customer Name</th>
@@ -152,9 +152,9 @@
                     <tr>
                     <th>Entry By</th>
                     @if(($customer->qb_staff_id == '') ||  ($customer->qb_staff_id == 0))
-                        <td>{{ $customer->entry_info['au_name'] }} ({{ $customer->entry_info['au_user_id'] }})</td>
+                        <td>@if($customer->entry_info){{ $customer->entry_info['au_name'] }} ({{ $customer->entry_info['au_user_id'] }})@else N/A @endif</td>
                     @else
-                        <td>{{ $customer->entry_staff['au_name'] }} ({{ $customer->entry_staff['au_user_id'] }})<br>( Admin Reference )</td>
+                        <td>@if($customer->entry_staff){{ $customer->entry_staff['au_name'] }} ({{ $customer->entry_staff['au_user_id'] }})@else N/A @endif<br>( Admin Reference )</td>
                     @endif
                       <th class="hidden-xs">Entry Date</th>
                       <td class="hidden-xs">{{ $customer->qb_submit_date }}</td>
@@ -257,7 +257,7 @@
                                         <!-- Price -->
                                         <td>{{ $feedback->cf_price }}</td>
                                         <td>{{ $feedback->cf_client_message }}</td>
-                                        <td>{{ $feedback->feedback_info['au_name'] }} / {{ $feedback->cf_previous_followup }}</td>
+                                        <td>{{ $feedback->feedback_info['au_name'] ?? 'N/A' }} / {{ $feedback->cf_previous_followup }}</td>
                                         <td align="center">
                                             @if( App\Models\Client_feedback::notifycus($feedback->cf_id) == 1)
                                                 <b style="color: blue;">

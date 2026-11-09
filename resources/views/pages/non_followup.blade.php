@@ -51,7 +51,7 @@
                     <td>{{ $follow->qb_name }}</td>
                     <td>{{ $follow->qb_company_name }}</td>
                     <td>{{ $follow->qb_address }}</td>
-                    <td>{{ $follow->reas_info['sr_reason'] }}</td>
+                    <td>{{ $follow->reas_info['sr_reason'] ?? 'N/A' }}</td>
                     <td>
                       @for( $i=0; $i<$follow->qb_result; $i++ )
                       <b style="color: green; font-size: 20px;">*</b>

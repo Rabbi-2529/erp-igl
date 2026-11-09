@@ -33,7 +33,7 @@
                   <td>{{ $list->qb_serial }}</td>
                   <td>{{ $list->qb_mobile }}</td>
                   <td>{{ $list->qb_company_name }}</td>
-                  <td>{{ $list->reas_info['sr_reason'] }}</td>
+                  <td>{{ $list->reas_info['sr_reason'] ?? 'N/A' }}</td>
                   <td>
                     @for( $i=1; $i<=$list->qb_result; ++$i )
                       <b style="color: green; font-size: 20px;">*</b>

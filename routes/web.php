@@ -167,6 +167,13 @@ Route::group([
     Route::get('hrm/letters/{id}/print', 'HrmLetterController@printView')->where('id', '[0-9]+')->name('hrm.letters.print');
     Route::post('hrm/letters/{id}/printed', 'HrmLetterController@printed')->where('id', '[0-9]+')->name('hrm.letters.printed');
     Route::post('hrm/letters/{id}/pdf', 'HrmLetterController@pdf')->where('id', '[0-9]+')->name('hrm.letters.pdf');
+    // HRM Letters: employees ask for a letter, HR makes it or declines
+    Route::get('hrm/letters/requests', 'HrmLetterRequestController@index')->name('hrm.letters.requests');
+    Route::post('hrm/letters/requests', 'HrmLetterRequestController@store')->name('hrm.letters.requests.store');
+    Route::post('hrm/letters/requests/{id}/make', 'HrmLetterRequestController@make')->where('id', '[0-9]+')->name('hrm.letters.requests.make');
+    Route::post('hrm/letters/requests/{id}/decline', 'HrmLetterRequestController@decline')->where('id', '[0-9]+')->name('hrm.letters.requests.decline');
+    Route::post('hrm/letters/requests/{id}/withdraw', 'HrmLetterRequestController@withdraw')->where('id', '[0-9]+')->name('hrm.letters.requests.withdraw');
+    Route::post('hrm/letters/types/{id}/requestable', 'HrmLetterRequestController@requestable')->where('id', '[0-9]+')->name('hrm.letters.types.requestable');
     // HRM Letters (Phase 2): templates
     Route::get('hrm/letters/templates', 'HrmLetterTemplateController@index')->name('hrm.letters.templates');
     Route::get('hrm/letters/templates/new', 'HrmLetterTemplateController@create')->name('hrm.letters.templates.create');

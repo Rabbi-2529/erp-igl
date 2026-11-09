@@ -71,7 +71,7 @@
                     <td>{{ $feedbacku->qb_name }}</td>
                     <td>{{ $feedbacku->qb_company_name }}</td>
                     <td>{{ $feedbacku->qb_address }}</td>
-                    <td>{{ $feedbacku->reas_info['sr_reason'] }}</td>
+                    <td>{{ $feedbacku->reas_info['sr_reason'] ?? 'N/A' }}</td>
                     <td>
                       @for( $i=0; $i<$feedbacku->qb_result; $i++ )
                         <b style="color: green; font-size: 20px;">*</b>

@@ -25,7 +25,7 @@
         <div class="table-responsive">
             <table class="table table-bordered table-striped lt-table">
                 <thead>
-                    <tr><th style="width: 40px;">#</th><th>Letter type</th><th>Prefix</th><th>Reference example</th><th>Default subject</th><th>Asks for</th><th>Review</th><th class="text-right">Letters</th><th>Status</th>@if($isAdmin)<th></th>@endif</tr>
+                    <tr><th style="width: 40px;">#</th><th>Letter type</th><th>Prefix</th><th>Reference example</th><th>Default subject</th><th>Asks for</th><th>Review</th>@if($askable !== null)<th>Employees can ask</th>@endif<th class="text-right">Letters</th><th>Status</th>@if($isAdmin)<th></th>@endif</tr>
                 </thead>
                 <tbody>
                     @foreach($types as $t)
@@ -39,6 +39,19 @@
                                 @forelse($t->field_list as $f)<span class="lt-tag">{{ $fields[$f][0] }}</span>@empty<span class="text-muted">-</span>@endforelse
                             </td>
                             <td>@if($t->hlt_needs_review)<span class="lt-tag on">Department head</span>@else<span class="text-muted">-</span>@endif</td>
+                            @if($askable !== null)
+                                @php $canAsk = in_array($t->hlt_id, $askable); @endphp
+                                <td style="white-space: nowrap;">
+                                    @if($isAdmin)
+                                        <form method="POST" action="{{ route('hrm.letters.types.requestable', $t->hlt_id) }}" style="margin: 0;">@csrf
+                                            <input type="hidden" name="allowed" value="{{ $canAsk ? 0 : 1 }}">
+                                            <button type="submit" class="btn btn-xs {{ $canAsk ? 'btn-success' : 'btn-default' }}" title="{{ $canAsk ? 'Click so employees can no longer ask for it' : 'Click so employees can ask for it from My Letters' }}"><i class="fa {{ $canAsk ? 'fa-check' : 'fa-ban' }}"></i> {{ $canAsk ? 'Yes' : 'No' }}</button>
+                                        </form>
+                                    @else
+                                        @if($canAsk)<span class="lt-tag on">Yes</span>@else<span class="text-muted">-</span>@endif
+                                    @endif
+                                </td>
+                            @endif
                             <td class="text-right">{{ $used[$t->hlt_id] ?? 0 }}</td>
                             <td>@if($t->hlt_status)<span class="label label-success">On</span>@else<span class="label label-default">Off</span>@endif</td>
                             @if($isAdmin)
@@ -56,6 +69,7 @@
         <p class="lt-note">
             "Asks for" are the extra details the letter form will ask for (and the placeholders they fill, e.g. Effective date &rarr; <code>&#123;&#123;effective_date&#125;&#125;</code>).
             "Review": the employee's department head reviews the letter before it is approved.
+            @if($askable !== null)"Employees can ask": employees can request this letter from their My Letters page; HR then makes it from Letter Requests.@endif
             Changing a prefix only affects new letters; letters already made keep their reference numbers.
             @unless($isAdmin) Only an HR Admin can change letter types. @endunless
         </p>

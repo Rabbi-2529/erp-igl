@@ -88,7 +88,7 @@
                                  <td>{{ $today->cus_mobile['qb_company_name'] }}</td>
                                   <td>{{ $today->cus_mobile['qb_address'] }}</td>
 
-                                  <td>{{ @$today->cus_mobile->reas_info['sr_reason'] }}</td>
+                                  <td>{{ @$today->cus_mobile->reas_info['sr_reason'] ?? 'N/A' }}</td>
                                   <td>
                                     @for( $i=1; $i<=$today->cf_result; ++$i )
                                       <b style="color: green; font-size: 20px;">*</b>

@@ -40,7 +40,7 @@
                             <td>{{ $my_customer->qb_name }}</td>
                             <td>{{ $my_customer->qb_company_name }}</td>
                             <td>{{ $my_customer->qb_address }}</td>
-                            <td>{{ $my_customer->reas_info['sr_reason'] }}</td>
+                            <td>{{ $my_customer->reas_info['sr_reason'] ?? 'N/A' }}</td>
                             <td>
                                 @for( $i = 1; $i <= $my_customer->qb_result; ++$i)
                                     <b style="color: green; font-size: 20px;">*</b>

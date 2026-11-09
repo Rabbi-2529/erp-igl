@@ -38,7 +38,7 @@
 
                 <tr>
                   <th>Reason</th>
-                  <td >{{ $customer->reas_info['sr_reason'] }}</td>
+                  <td >{{ $customer->reas_info['sr_reason'] ?? 'N/A' }}</td>
                   <th class="hidden-xs">Birth Date</th>
                   <td class="hidden-xs">{{ $customer->qb_birth_date }}</td>
                   <td rowspan="5" align="center">

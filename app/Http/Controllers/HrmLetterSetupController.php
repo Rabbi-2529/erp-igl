@@ -48,7 +48,9 @@ class HrmLetterSetupController extends Controller
         $used = DB::table('hrm_letters')->where('hl_company_id', $h->company)->groupBy('hl_type_id')->selectRaw('hl_type_id, COUNT(*) n')->pluck('n', 'hl_type_id');
         $fields = HrmLetters::FIELDS;
         $isAdmin = $h->isHrAdmin();
-        return view('page.hrm.letters.types', compact('types', 'used', 'fields', 'isAdmin'));
+        // which types employees may ask for from My Letters (null until database/hrm_letter_requests.sql has been run)
+        $askable = \App\Services\HrmLetterRequests::ready() ? (new \App\Services\HrmLetterRequests($h))->requestableIds() : null;
+        return view('page.hrm.letters.types', compact('types', 'used', 'fields', 'isAdmin', 'askable'));
     }
 
     private function typeRules()

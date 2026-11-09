@@ -64,7 +64,7 @@
                                   @endif
                             </td>
                             <td>{{ $customer->qb_address }}</td>
-                            <td>{{ $customer->reas_info['sr_reason'] }}</td>
+                            <td>{{ $customer->reas_info['sr_reason'] ?? 'N/A' }}</td>
                             <td>
                               @for( $i=1; $i<=$customer->qb_result; ++$i )
                                 <b style="color: green; font-size: 20px;">*</b>

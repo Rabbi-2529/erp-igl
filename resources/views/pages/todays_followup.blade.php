@@ -48,7 +48,7 @@
                   </td>
                   <td>{{ $today->cus_mobile['qb_name'] }}</td>
                   <td>{{ $today->cus_mobile['qb_company_name'] }}</td>
-                  <td>{{ @$today->cus_mobile->reas_info['sr_reason'] }}</td>
+                  <td>{{ @$today->cus_mobile->reas_info['sr_reason'] ?? 'N/A' }}</td>
                   <td>
                       @if ($today->cus_mobile['qb_cus_type'] == 1 || $today->cus_mobile['qb_cus_type'] == 0)
                         <span class="text-success">Potential</span>

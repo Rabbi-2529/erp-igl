@@ -145,7 +145,15 @@ class HrmLetterController extends Controller
         $list = DB::table('hrm_letters as l')->join('hrm_letter_types as t', 't.hlt_id', '=', 'l.hl_type_id')
             ->where('l.hl_company_id', $h->company)->where('l.hl_employee_id', Auth::user()->au_id)->whereIn('l.hl_status', ['approved', 'issued'])
             ->orderByDesc('l.hl_letter_date')->orderByDesc('l.hl_id')->get(['l.hl_id', 'l.hl_reference', 'l.hl_letter_date', 'l.hl_subject', 'l.hl_status', 't.hlt_name']);
-        return view('page.hrm.letters.my_letters', compact('list'));
+        // letters the employee asked HR for (once database/hrm_letter_requests.sql has been run)
+        $requests = collect();
+        $requestTypes = collect();
+        if (\App\Services\HrmLetterRequests::ready()) {
+            $rq = new \App\Services\HrmLetterRequests($h);
+            $requests = $rq->query()->where('q.hlq_employee_id', Auth::user()->au_id)->orderByDesc('q.hlq_id')->limit(50)->get();
+            $requestTypes = $rq->requestableTypes();
+        }
+        return view('page.hrm.letters.my_letters', compact('list', 'requests', 'requestTypes'));
     }
 
     // ------------------------------------------------------------------ generate
@@ -224,7 +232,10 @@ class HrmLetterController extends Controller
         ];
         $deptHead = $l->dep_head_now ? DB::table('admin_user')->where('au_id', $l->dep_head_now)->value('au_name') : null;
         $placeholders = HrmLetterContent::PLACEHOLDERS;
-        return view('page.hrm.letters.letter_show', compact('l', 'pad', 'letter', 'missing', 'unknown', 'history', 'signatories', 'can', 'deptHead', 'placeholders'));
+        // what the employee asked for, when the letter was made from their request
+        $asked = \App\Services\HrmLetterRequests::ready()
+            ? DB::table('hrm_letter_requests')->where('hlq_company_id', $f->letters->company)->where('hlq_letter_id', $l->hl_id)->first() : null;
+        return view('page.hrm.letters.letter_show', compact('l', 'pad', 'letter', 'missing', 'unknown', 'history', 'signatories', 'can', 'deptHead', 'placeholders', 'asked'));
     }
 
     /** Draft details from the form: [overrides, error] */

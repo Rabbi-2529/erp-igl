@@ -41,6 +41,10 @@
     $ltLinks = [];
     if ($ltFull || $ltHead) { $ltLinks[] = ['hrm.letters.index', 'fa-envelope-o', 'Letters', false]; }
     if ($ltH->isHrExecutive()) { $ltLinks[] = ['hrm.letters.create', 'fa-plus', 'Generate Letter', false]; }
+    if ($ltH->isHrExecutive() && \App\Services\HrmLetterRequests::ready()) {
+        $ltWaiting = (new \App\Services\HrmLetterRequests($ltH))->pendingCount();
+        $ltLinks[] = ['hrm.letters.requests', 'fa-inbox', 'Requests' . ($ltWaiting ? ' (' . $ltWaiting . ')' : ''), false];
+    }
     $ltLinks[] = ['hrm.letters.my', 'fa-user', 'My Letters', false];
     if ($ltFull) {
         foreach ([['hrm.letters.types', 'fa-tags', 'Letter Types'], ['hrm.letters.templates', 'fa-file-word-o', 'Templates'], ['hrm.letters.letterhead', 'fa-file-text-o', 'Letterhead PAD'],

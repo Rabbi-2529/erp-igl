@@ -72,7 +72,7 @@
                     <td>{{ $reason->qb_name }}</td>
                     <td>{{ $reason->qb_company_name }}</td>
                     <td>{{ $reason->qb_address }}</td>
-                    <td>{{ $reason->reas_info['sr_reason'] }}</td>
+                    <td>{{ $reason->reas_info['sr_reason'] ?? 'N/A' }}</td>
                     <td>
                       @for( $i=0; $i<$reason->qb_result; $i++ )
                         <b style="color: green; font-size: 20px;">*</b>
