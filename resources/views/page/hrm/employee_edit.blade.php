@@ -114,6 +114,7 @@
                                         @endforeach
                                     </select>`
                                     @endif
+                                    @include('page.hrm.employees._same_person', ['spOldName' => $user_edits->au_name, 'spSelector' => '[name="au_name"]'])
                                             </div>
                                         </div>
                         

@@ -40,7 +40,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                {{ $users->firstWhere('au_user_id', $employeeFine->au_user_id)->au_name ?? 'Unknown' }}
+                                {{ $fineHolders[$employeeFine->id]->au_name ?? 'Unknown' }}
                                 ({{ $employeeFine->au_user_id }})
                             </td>
 
@@ -82,8 +82,8 @@
                                                     @endphp
                                                     
                                                     @foreach($sorted_users as $user)
-                                                    <option value="{{ $user->au_user_id }}" {{ $user->au_user_id == $employeeFine->au_user_id ? 'selected' : '' }}>
-                                                        {{ $user->au_user_id }} ({{ $user->au_name }})
+                                                    <option value="{{ $user->au_user_id }}" {{ $user->au_user_id == $employeeFine->au_user_id && (empty($fineHolders[$employeeFine->id]) || $fineHolders[$employeeFine->id]->au_id == $user->au_id) ? 'selected' : '' }}>
+                                                        {{ $user->au_user_id }} ({{ $user->au_name }}){{ $leftIds->has($user->au_id) ? ' (left)' : '' }}
                                                     </option>
 
                                                     @endforeach

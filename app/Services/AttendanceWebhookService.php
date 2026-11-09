@@ -55,7 +55,9 @@ class AttendanceWebhookService
             return $this->skip($event['au_user_id'], 'Neither a check-in nor a check-out time was supplied.');
         }
 
-        $user = $this->resolveUser($event['au_user_id']);
+        $punchDay = $event['work_date']
+            ?: ($event['check_in'] ? $event['check_in']->toDateString() : ($event['check_out'] ? $event['check_out']->toDateString() : null));
+        $user = $this->resolveUser($event['au_user_id'], $punchDay);
 
         if (! $user) {
             return $this->skip($event['au_user_id'], 'No employee found with this au_user_id.');
@@ -378,25 +380,25 @@ class AttendanceWebhookService
     }
 
     /**
-     * au_user_id is a plain varchar with no unique index, so pick the match
-     * deterministically (active first, then lowest au_id) and flag duplicates.
+     * au_user_id is a plain varchar with no unique index: after someone leaves, HR may give the same Employee ID
+     * to a new employee (a new record). Use whoever had the ID on the punch day (EmployeeTenure::holder: not
+     * someone who had left, not someone who joined later, then active first, then lowest au_id) and flag duplicates.
      */
-    private function resolveUser(string $auUserId): ?Admin_user
+    private function resolveUser(string $auUserId, ?string $day = null): ?Admin_user
     {
-        $matches = Admin_user::where('au_user_id', $auUserId)
-            ->orderByDesc('au_status')
-            ->orderBy('au_id')
-            ->get();
+        $matches = EmployeeTenure::candidates(null, $auUserId);
+        $user = EmployeeTenure::holder(null, $auUserId, $day);
 
         if ($matches->count() > 1) {
             Log::channel('attendance_webhook')->warning('Ambiguous au_user_id in admin_user', [
                 'au_user_id' => $auUserId,
                 'au_ids'     => $matches->pluck('au_id')->all(),
-                'used_au_id' => $matches->first()->au_id,
+                'used_au_id' => $user ? $user->au_id : null,
+                'day'        => $day,
             ]);
         }
 
-        return $matches->first();
+        return $user;
     }
 
     /**

@@ -35,7 +35,7 @@
                             <option value="">Select Option</option>
                             <!-- Iterate over the sorted users and populate the select options -->
                             @foreach ($sorted_users as $user)
-                                <option value="{{ $user->au_user_id }}">{{ $user->au_user_id }} ({{ $user->au_name }})</option>
+                                <option value="{{ $user->au_user_id }}">{{ $user->au_user_id }} ({{ $user->au_name }}){{ isset($leftIds) && $leftIds->has($user->au_id) ? ' (left)' : '' }}</option>
                             @endforeach
                         </select>
 

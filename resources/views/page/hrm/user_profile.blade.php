@@ -41,6 +41,10 @@
     .erp-profile-dot { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--erp-white); border: 3px solid var(--erp-green-btn); }
     .erp-profile-when { font-size: 12px; font-weight: 700; color: var(--erp-muted); }
     .erp-profile-what { color: var(--erp-text); line-height: 1.45; }
+    .erp-exit-info { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .erp-exit-info form { margin: 0; }
+    .content .alert-warning.erp-exit-info { background: #fff4d6; border-color: #f0c36d; color: #5c4000; }
+    html[data-theme="dark"] .content .alert-warning.erp-exit-info { background: #3a2c08; border-color: #7a5b14; color: #f5dfa0; }
     @media (max-width: 600px) {
         .erp-profile-main { justify-content: center; text-align: center; }
         .erp-profile-chips, .erp-profile-actions { justify-content: center; }
@@ -89,6 +93,9 @@
                     <a href="{{ url('user_edit/' . $user_infos->au_id) }}" class="btn btn-default"><i class="fa fa-pencil"></i> Edit Employee</a>
                 @endif
             @endif
+            @if($canManageExit && !$exitInfo)
+                <button type="button" class="btn btn-default" data-exit-url="{{ route('hrm.employees.exit', $user_infos->au_id) }}" data-name="{{ $user_infos->au_name }}" data-code="{{ $user_infos->au_user_id }}" data-mobile="{{ $user_infos->au_mobile }}"><i class="fa fa-sign-out"></i> Exit Employee</button>
+            @endif
             @if (App\Models\Admin_user::where('au_company_id', Auth::user()->au_company_id)->value('au_flexi_permission') == 1)
                 @if (Auth::user()->au_user_type != 4)
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Flexi</button>
@@ -100,6 +107,25 @@
         </div>
     </div>
 </div>
+
+{{-- Marked as left (Exit employee): HR sees when and why, and can undo it --}}
+@if($exitInfo)
+    <div class="alert alert-warning erp-exit-info" id="erpExitInfo" role="status">
+        <div>
+            <b><i class="fa fa-sign-out"></i> {{ $user_infos->au_name }} left.</b>
+            Last working day {{ \Carbon\Carbon::parse($exitInfo->hee_last_day)->format('d M Y') }}
+            &middot; {{ \App\Services\EmployeeTenure::TYPES[$exitInfo->hee_type] ?? $exitInfo->hee_type }}
+            @if($exitInfo->hee_reason)<br>{{ $exitInfo->hee_reason }}@endif
+            <br><small>Recorded by {{ $exitInfo->by_name ?: 'HR' }} on {{ \Carbon\Carbon::parse($exitInfo->hee_created_at)->format('d M Y') }}. Their login is off; their history stays on this record.</small>
+        </div>
+        @if($canManageExit)
+            <form method="POST" action="{{ route('hrm.employees.exit.undo', $user_infos->au_id) }}" onsubmit="return confirm('Undo the exit? {{ addslashes($user_infos->au_name) }} will be working again and can log in.');">
+                @csrf
+                <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-undo"></i> Undo exit</button>
+            </form>
+        @endif
+    </div>
+@endif
 
 {{-- Details --}}
 <div class="row erp-profile-cols">
@@ -232,6 +258,50 @@
     </div>
 </div>
 
+{{-- Everyone who had this Employee ID or office mobile (the seat), in the order they joined: each keeps their own history --}}
+@if($seatHistory->isNotEmpty())
+    <div class="panel panel-bd erp-profile-card">
+        <div class="panel-heading">
+            <h4><i class="fa fa-exchange"></i>Employee ID / Mobile History</h4>
+        </div>
+        <div class="panel-body">
+            <p class="erp-profile-empty" style="margin-top: 0;">Each person has their own record, so attendance, salary and letters stay with the person who had the ID at the time.</p>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" style="margin-bottom: 0;">
+                    <thead><tr><th>Name</th><th>Employee ID</th><th>Mobile</th><th>Joined</th><th>Status</th></tr></thead>
+                    <tbody>
+                        @foreach($seatHistory as $seat)
+                            <tr>
+                                <td>
+                                    @if((int) $seat->au_id === (int) $user_infos->au_id)
+                                        <b>{{ $seat->au_name }}</b> <small class="text-muted">(this profile)</small>
+                                    @else
+                                        <a href="{{ url('/user_profile/' . $seat->au_id) }}">{{ $seat->au_name }}</a>
+                                    @endif
+                                </td>
+                                <td>{{ $seat->au_user_id }}</td>
+                                <td>{{ $seat->au_mobile }}</td>
+                                <td>{{ $seat->joined ? $seat->joined->format('d M Y') : ($seat->au_created_date ?: '-') }}</td>
+                                <td>
+                                    @if($seat->exit)
+                                        Left {{ \Carbon\Carbon::parse($seat->exit->hee_last_day)->format('d M Y') }} <small class="text-muted">({{ \App\Services\EmployeeTenure::TYPES[$seat->exit->hee_type] ?? $seat->exit->hee_type }})</small>
+                                    @elseif((int) $seat->au_status === 1)
+                                        <span class="text-success"><b>Working</b></span>
+                                    @else
+                                        <span class="text-muted">Turned off</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endif
+
+@include('page.hrm.employees._exit_modal')
+
 {{-- Flexi windows (unchanged) --}}
 @if (App\Models\Admin_user::where('au_company_id', Auth::user()->au_company_id)->value('au_flexi_permission') == 1)
                     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -296,6 +366,7 @@
                                 <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
                                 <div class="col-sm-9">
                                     <input type="text" name="user" class="form-control" id="inputEmail3" value="{{ $user_infos->au_name }}">
+                                    @include('page.hrm.employees._same_person', ['spOldName' => $user_infos->au_name, 'spSelector' => 'input[name="user"]'])
                                 </div>
                             </div>
                             <div class="form-group">

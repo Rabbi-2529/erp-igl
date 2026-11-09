@@ -12,6 +12,18 @@
         <div class="panel panel-bd lobidrag">
             
             <div class="panel-body">
+                <style>
+                    .erp-emp-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+                    .erp-emp-filter .active { color: var(--erp-on-primary); background: var(--erp-green-btn); border-color: var(--erp-green-btn); }
+                    .erp-emp-left { display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 9px; font-size: 11px; font-weight: 700; white-space: nowrap; color: #fff; background: #5f6b66; }
+                </style>
+                <div class="erp-emp-filter" role="group" aria-label="Show employees">
+                    <a href="{{ url('/user_list') }}" class="btn btn-default btn-sm {{ $show === 'all' ? 'active' : '' }}">All ({{ $counts['all'] }})</a>
+                    <a href="{{ url('/user_list?show=working') }}" class="btn btn-default btn-sm {{ $show === 'working' ? 'active' : '' }}"><i class="fa fa-check"></i> Working ({{ $counts['working'] }})</a>
+                    @if($canExit)
+                        <a href="{{ url('/user_list?show=left') }}" class="btn btn-default btn-sm {{ $show === 'left' ? 'active' : '' }}"><i class="fa fa-sign-out"></i> Left ({{ $counts['left'] }})</a>
+                    @endif
+                </div>
                 <div class="table-responsive">
                     <table id="" class="table table-bordered table-striped table-hover datatable">
                         <thead>
@@ -117,9 +129,12 @@
                                 <td>
                                     <center>
                                         <div class="toggle-switch">
-                                            <input type="checkbox" name="" id="statusToggle{{ $user->au_id }}" data-size="mini" value="" data-toggle="toggle" data-on="Active" data-off="Inactive" data-user-id="{{ $user->au_id }}" {{ $user->au_status == 1 ? 'checked' : '' }}>
+                                            <input type="checkbox" name="" id="statusToggle{{ $user->au_id }}" data-size="mini" value="" data-toggle="toggle" data-on="Active" data-off="Inactive" data-user-id="{{ $user->au_id }}" {{ $user->au_status == 1 ? 'checked' : '' }} @if($exits->has($user->au_id)) data-left="{{ $user->au_name }} left on {{ \Carbon\Carbon::parse($exits[$user->au_id]->hee_last_day)->format('d M Y') }}" @endif>
                                             <label for="statusToggle{{ $user->au_id }}"></label>
                                         </div>
+                                        @if($exits->has($user->au_id))
+                                            <span class="erp-emp-left" title="{{ \App\Services\EmployeeTenure::TYPES[$exits[$user->au_id]->hee_type] ?? '' }}">Left {{ \Carbon\Carbon::parse($exits[$user->au_id]->hee_last_day)->format('d M Y') }}</span>
+                                        @endif
                                     </center>
                                 </td>
                                 
@@ -149,6 +164,21 @@
                                                     <i class="fa fa-server" aria-hidden="true"></i> Permission
                                                 </a>
                                             </li>
+                                            @if($canExit && !in_array((int) $user->au_user_type, [1, 3, 4], true) && (int) $user->au_id !== (int) Auth::id())
+                                                @if($exits->has($user->au_id))
+                                                    <li>
+                                                        <a href="{{ url('/user_profile',['id' => $user->au_id]) }}#erpExitInfo" title="Left: see the profile to undo">
+                                                            <i class="fa fa-sign-out" aria-hidden="true"></i> Left (see profile)
+                                                        </a>
+                                                    </li>
+                                                @else
+                                                    <li>
+                                                        <a href="#" data-exit-url="{{ route('hrm.employees.exit', $user->au_id) }}" data-name="{{ $user->au_name }}" data-code="{{ $user->au_user_id }}" data-mobile="{{ $user->au_mobile }}">
+                                                            <i class="fa fa-sign-out" aria-hidden="true"></i> Exit employee
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            @endif
                                         </ul>
                                     </div>
                                 </td>
@@ -199,13 +229,24 @@
         });
 
         // User Active/Inactive Script
+        // put the switch back without sending anything (when the server or the user says no)
+        function putBack(box, on) {
+            var t = $(box).data('bs.toggle');
+            if (t) { t[on ? 'on' : 'off'](true); } else { box.checked = on; }
+        }
         $(document).on('change', '.toggle-switch input[type="checkbox"]', function () {
+            var box = this;
             var userId = $(this).data('user-id');
             var status = this.checked ? 1 : 0;
 
             var route = '';
 
             if (status === 1) {
+                // someone marked as left: turning them on undoes the exit
+                if ($(box).attr('data-left') && !confirm($(box).attr('data-left') + '. Turn them on again? This undoes the exit.')) {
+                    putBack(box, false);
+                    return;
+                }
                 route = 'user_list_activate/' + userId;
             } else {
                 route = 'user_list_deactivate/' + userId;
@@ -213,8 +254,14 @@
             $.ajax({
                 url: route,
                 method: 'GET',
+                headers: { 'Accept': 'application/json' },
                 success: function (response) {
-                    console.log(response);
+                    if (response && response.ok === false) {
+                        putBack(box, !status);
+                        alert(response.message);
+                        return;
+                    }
+                    if (status === 1 && $(box).attr('data-left')) { window.location.reload(); }
                 },
                 error: function (xhr, status, error) {
                     console.error(error);
@@ -225,5 +272,6 @@
 
 </script>
 
+@include('page.hrm.employees._exit_modal')
 
 @endsection

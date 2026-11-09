@@ -119,6 +119,10 @@ Route::group([
     Route::get('/hos_team_list/{id}','UserController@agm_team_leaders')->middleware('HeadOfSales');
 
     Route::get('/user_list','UserController@user_list')->middleware('au_access:user');
+    // HRM: an employee leaves; their record and history stay with them, their ID and mobile can go to a new employee
+    Route::post('hrm/employees/{id}/exit', 'HrmEmployeeExitController@store')->name('hrm.employees.exit')->middleware('au_access:user');
+    Route::post('hrm/employees/{id}/exit/undo', 'HrmEmployeeExitController@undo')->name('hrm.employees.exit.undo')->middleware('au_access:user');
+    Route::get('hrm/employees/number-check', 'HrmEmployeeExitController@check')->name('hrm.employees.number-check')->middleware('au_access:user_register');
 
 // 
     Route::post('user-flexi-permission/{id}','UserController@userFlexiPermission')->name('user-flexi-permission');

@@ -24,6 +24,7 @@ use App\Models\OfficeLunch;
 use App\Models\UserFlexiload;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeBloodDonate;
+use App\Services\EmployeeTenure;
 
 use App\Models\Holiday;
 use App\Models\Weekends;
@@ -596,6 +597,14 @@ $today_feedback= Client_feedback::where('cf_company_id',$com)
         $com_name = Auth::user()->au_company_name;
         $branch_id = Auth::user()->au_branch_id;
         $branch_name = Auth::user()->au_branch_name;
+        // the office mobile and Employee ID may have been someone's who left (the new employee still gets a new
+        // record, so that person's history stays with them), but not someone's who is still working
+        foreach (['mobile' => $request->input('au_mobile'), 'code' => $request->input('au_user_id')] as $field => $value) {
+            $check = EmployeeTenure::check($com_id, $field, $value);
+            if ($check['state'] === 'taken') {
+                return redirect()->back()->withInput($request->except('au_password'))->with('error', $check['text']);
+            }
+        }
             $table = new Admin_user;
             $date = Carbon::now()->format('Y-m-d');
             $table ->au_company_id = $com_id;
@@ -754,6 +763,9 @@ $today_feedback= Client_feedback::where('cf_company_id',$com)
       $workingShift = implode(',',$merge);
 
       $settings = Admin_user::find($id);
+      if ($why = $this->identityGuard($request, $settings, $request->input('user'), $request->input('cell'), $request->input('au_user_id'))) {
+          return redirect()->back()->with('error', $why);
+      }
       $settings->au_name = $request->input('user');
       $settings->au_mobile = $request->input('cell');
 
@@ -860,7 +872,22 @@ public function user_list(){
             ->get();
     }
 
-    return view('page.hrm.manage_employee', compact('users'));
+    // who has left (Exit employee), and the Working / Left filter (all by default, as before)
+    $exits = EmployeeTenure::exitsFor($users->pluck('au_id'));
+    $show = in_array(request('show'), ['working', 'left'], true) ? request('show') : 'all';
+    $counts = [
+        'all'     => $users->count(),
+        'working' => $users->filter(function ($u) use ($exits) { return (int) $u->au_status === 1 && !$exits->has((int) $u->au_id); })->count(),
+        'left'    => $exits->count(),
+    ];
+    if ($show === 'working') {
+        $users = $users->filter(function ($u) use ($exits) { return (int) $u->au_status === 1 && !$exits->has((int) $u->au_id); })->values();
+    } elseif ($show === 'left') {
+        $users = $users->filter(function ($u) use ($exits) { return $exits->has((int) $u->au_id); })->values();
+    }
+    $canExit = EmployeeTenure::ready();
+
+    return view('page.hrm.manage_employee', compact('users', 'exits', 'show', 'counts', 'canExit'));
 }
 
     public function user_profile($id){
@@ -929,9 +956,30 @@ public function user_list(){
             });
         $canSeeLeader = $teamLeader && $this->canViewProfile(Auth::user(), $teamLeader);
 
+        // Exit employee (HR: company admin / owner, or the Manage Employee permission), and who had this ID / mobile before
+        $viewer = Auth::user();
+        $userAccessCode = \App\Models\Au_access::where('permission_name', 'user')->value('code');
+        $hasUserAccess = $userAccessCode !== null && in_array((string) $userAccessCode, explode('-', (string) $viewer->au_permission_status), true);
+        $isHr = $isCompanyAdmin || $hasUserAccess;
+        $exitInfo = $isHr ? EmployeeTenure::openExit($user_infos->au_id) : null;
+        if ($exitInfo) {
+            $exitInfo->by_name = Admin_user::where('au_id', $exitInfo->hee_created_by)->value('au_name');
+        }
+        // the exit routes let through who the Manage Employee page does (owner, company admin, the permission)
+        $canManageExit = EmployeeTenure::ready() && !$isOwnProfile
+            && (in_array((int) $viewer->au_user_type, [3, 4], true) || $hasUserAccess)
+            && !in_array((int) $user_infos->au_user_type, [1, 3, 4], true)
+            && (int) $user_infos->au_company_id === (int) $viewer->au_company_id
+            && ((int) $viewer->au_user_type === 3 || (int) $user_infos->au_branch_id === (int) $viewer->au_branch_id);
+        $seatHistory = $isHr ? EmployeeTenure::seatHistory($user_infos) : collect();
+        if ($seatHistory->count() < 2) {
+            $seatHistory = collect();
+        }
+
         return view('page.hrm.user_profile',compact('user_infos','depts','shifts','experience','reference',
             'isOwnProfile', 'isCompanyAdmin', 'departmentNames', 'shiftName', 'place', 'profileImage',
-            'team', 'teamLeader', 'teamSize', 'shiftTiming', 'activities', 'canSeeLeader'));
+            'team', 'teamLeader', 'teamSize', 'shiftTiming', 'activities', 'canSeeLeader',
+            'exitInfo', 'canManageExit', 'seatHistory'));
     }
     public function user_profile_status(Request $request,$id){
         $admin = Admin_user::find($id);
@@ -964,6 +1012,17 @@ public function user_list(){
     }
     public function user_list_activate(Request $request,$id){
         $user = Admin_user::find($id);
+        // someone else who is working now uses this person's mobile or Employee ID: two people cannot share them
+        if ($user && ($why = EmployeeTenure::activationConflict($user))) {
+            return ($request->ajax() || $request->expectsJson())
+                ? response()->json(['ok' => false, 'message' => $why])
+                : redirect('/user_list')->with('error', $why);
+        }
+        // turning on someone marked as left undoes the exit (the exit stays in the history, marked as undone)
+        if ($user && EmployeeTenure::openExit($user->au_id)) {
+            EmployeeTenure::cancelExit((int) $user->au_id, (int) Auth::id(), 'Turned on again by ' . Auth::user()->au_name);
+            return redirect('/user_list');
+        }
         $user->au_status = 1;
         $user-> save();
         return redirect('/user_list');
@@ -1012,6 +1071,11 @@ public function user_list(){
         $workingShift = implode(',',$merge);
         // dd($workingShift);
         $user = Admin_user::find($id);
+        if ($why = $this->identityGuard($request, $user, $request->input('au_name'), $request->input('au_mobile'), $request->input('au_user_id'), $request->status)) {
+            return redirect()->back()->with('error', $why);
+        }
+        // set to Active while marked as left: that undoes the exit (kept in the history, marked as undone)
+        $undoExit = $user && (string) $request->status === '1' && EmployeeTenure::openExit($user->au_id);
         $user->au_name = $request->input('au_name');
         if( Auth::user()->au_user_type == 1 ){
           $user->au_user_type = 4;
@@ -1059,11 +1123,50 @@ public function user_list(){
                 $user ->au_team_id = Input::get('au_team_id_team');
             }
         $user ->au_user_id = Input::get('au_user_id');
-        $user->au_user_salary = $request->input('au_user_salary'); 
-        $user->au_user_facility = $request->input('au_user_facility'); 
+        $user->au_user_salary = $request->input('au_user_salary');
+        $user->au_user_facility = $request->input('au_user_facility');
 
         $user->save();
+        if ($undoExit) {
+            try {
+                EmployeeTenure::cancelExit((int) $user->au_id, (int) Auth::id(), 'Set to Active in Update Employee by ' . Auth::user()->au_name);
+            } catch (\RuntimeException $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
         return redirect()->back()->with(['update' => 'User Profile is updated Successfully']);
+    }
+
+    /**
+     * Before an employee's name, mobile or Employee ID changes: stop a new person being typed over this record (all of
+     * this record's history would show under the new name), and stop two working people sharing one mobile or Employee ID.
+     * Returns why the change is refused, or null.
+     */
+    private function identityGuard(Request $request, $user, $name, $mobile, $code, $status = null)
+    {
+        if (!$user) {
+            return null;
+        }
+        if ($name !== null && EmployeeTenure::looksLikeAnotherPerson($user->au_name, $name) && $request->input('same_person') !== '1') {
+            $new = trim($name);
+            return 'The name was changed from "' . $user->au_name . '" to "' . $new . '". If ' . $new . ' is a new employee, do not write over '
+                . $user->au_name . ' (all their attendance, salary and other history would show under the new name): use Exit employee on '
+                . $user->au_name . ' and add ' . $new . ' from Add Employee. If it is the same person, tick "Same person, I am only correcting the name" and save again.';
+        }
+        $on = $status === null ? (int) $user->au_status === 1 : (string) $status === '1';
+        if (!$on) {
+            return null;
+        }
+        $turningOn = (int) $user->au_status !== 1;
+        if (($turningOn || ($mobile !== null && trim((string) $mobile) !== trim((string) $user->au_mobile)))
+            && ($other = EmployeeTenure::activeHolder($user->au_company_id, 'au_mobile', $mobile ?? $user->au_mobile, $user->au_id))) {
+            return 'Mobile ' . trim($mobile ?? $user->au_mobile) . ' is used by ' . $other->au_name . ', who is working. Two working employees cannot share one mobile number (it is their login).';
+        }
+        if (($turningOn || ($code !== null && trim((string) $code) !== trim((string) $user->au_user_id)))
+            && ($other = EmployeeTenure::activeHolder($user->au_company_id, 'au_user_id', $code ?? $user->au_user_id, $user->au_id))) {
+            return 'Employee ID ' . trim($code ?? $user->au_user_id) . ' is used by ' . $other->au_name . ', who is working. Two working employees cannot share one Employee ID (the attendance machine would mix them).';
+        }
+        return null;
     }
 
 
@@ -1870,16 +1973,19 @@ $user->au_blood_group = $request->input('au_blood_group');
         $users = Admin_user::where('au_company_id', $com_id)
                         ->where('au_branch_id', $branch_id)
                            ->orderBy('au_blood_group', 'asc')
-                           ->select('au_user_id', 'au_blood_group', 'au_name', 'au_department')
+                           ->select('au_id', 'au_company_id', 'au_created_date', 'au_user_id', 'au_blood_group', 'au_name', 'au_department')
                            ->get();
-    
+
         // Fetch blood donation records and their status for each user
         $bloodDonationRecords = EmployeeBloodDonate::whereIn('employee_id', $users->pluck('au_user_id'))
                                                    ->get();
-    
+
         // Combine user data with their blood donation status
         $usersWithBloodDonationStatus = $users->map(function ($user) use ($bloodDonationRecords) {
-            $donationRecord = $bloodDonationRecords->firstWhere('employee_id', $user->au_user_id);
+            // donations are saved by Employee ID: only count the ones made while this person had the ID
+            $donationRecord = $bloodDonationRecords->first(function ($r) use ($user) {
+                return $r->employee_id == $user->au_user_id && EmployeeTenure::heldBy($user, $r->employee_id, $r->donate_date);
+            });
     
             // If no donation record exists, set the status as 'Available' by default
             $user->donation_status = $donationRecord ? $donationRecord->status : 'Available';
@@ -1912,7 +2018,18 @@ $user->au_blood_group = $request->input('au_blood_group');
             })
             ->orderBy('donate_date', 'desc')
             ->get();
+        // the Employee ID may have been someone else's before: only their own donations
+        $donations = $donations->filter(function ($d) {
+            return EmployeeTenure::heldBy(Auth::user(), $d->employee_id, $d->donate_date);
+        })->values();
     }
+
+    // a donation is saved by Employee ID: show whoever had the ID on the donation day
+    $donations->each(function ($d) use ($com_id) {
+        if ($holder = EmployeeTenure::holder($com_id, $d->employee_id, $d->donate_date)) {
+            $d->setRelation('adminUser', $holder);
+        }
+    });
 
     return view('blood_donates.donated_users', compact('donations'));
 }

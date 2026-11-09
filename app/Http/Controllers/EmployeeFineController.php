@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log; // Ensure this line is present
 use Illuminate\Support\Facades\Auth;
 use App\Models\Fine;
+use App\Services\EmployeeTenure;
 use Carbon\Carbon;
 
 class EmployeeFineController extends Controller
@@ -32,13 +33,23 @@ public function index()
     // Get users of the same company and branch
     $users = Admin_User::where('au_company_id', $com_id)
         ->where('au_branch_id', $branch_id)
-        ->get(['au_user_id', 'au_name']);
+        ->get(['au_id', 'au_user_id', 'au_name']);
+
+    // A fine is saved by Employee ID, which can have been given to a new employee after someone left:
+    // name whoever had the ID on the fine's date
+    $fineHolders = [];
+    foreach ($employeeFines as $employeeFine) {
+        $holder = EmployeeTenure::holder($com_id, $employeeFine->au_user_id, $employeeFine->date);
+        $fineHolders[$employeeFine->id] = ($holder && $users->contains('au_id', $holder->au_id))
+            ? $holder : $users->firstWhere('au_user_id', $employeeFine->au_user_id);
+    }
+    $leftIds = EmployeeTenure::exitsFor($users->pluck('au_id'));
 
     // Get all fine types (not branch-specific)
     $fines = Fine::all(['id', 'title']);
 
     // Return the view with data
-    return view('inventory.accounts.employee_fines.index', compact('employeeFines', 'users', 'fines'));
+    return view('inventory.accounts.employee_fines.index', compact('employeeFines', 'users', 'fines', 'fineHolders', 'leftIds'));
 }
 
 
@@ -57,13 +68,14 @@ public function create()
     // Get all users from the same company and branch
     $users = Admin_User::where('au_company_id', $companyId)
                        ->where('au_branch_id', $branchId)
-                       ->get(['au_user_id', 'au_name']);
+                       ->get(['au_id', 'au_user_id', 'au_name']);
+    $leftIds = EmployeeTenure::exitsFor($users->pluck('au_id'));   // shown as "(left)"
 
     // Get all fines
     $fines = Fine::all(['id', 'title']);
 
     // Return view with filtered users and fines
-    return view('inventory.accounts.employee_fines.create', compact('users', 'fines'));
+    return view('inventory.accounts.employee_fines.create', compact('users', 'fines', 'leftIds'));
 }
 
     /**

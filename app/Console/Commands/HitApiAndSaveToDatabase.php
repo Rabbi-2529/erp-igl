@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\EmployeeAttendance;
 use App\Models\Admin_user;
 use App\Models\PayrollShiftManagement;
+use App\Services\EmployeeTenure;
 use Carbon\Carbon;
 
 
@@ -66,7 +67,10 @@ class HitApiAndSaveToDatabase extends Command
 
     private function processUserRecord($record)
     {
-        $adminUser = Admin_user::where('au_user_id', $record['user_id'])->first();
+        // the Employee ID can have been given to a new employee after someone left: use whoever had it on that day
+        $workDate = $record['work_date'] ?? null;
+        $adminUser = EmployeeTenure::holder($this->companyId, $record['user_id'], $workDate)
+            ?: EmployeeTenure::holder(null, $record['user_id'], $workDate);
         $userId = $adminUser?->au_id ?? $record['user_id'];
 
         if (isset($record['checkin_timestamp'])) {

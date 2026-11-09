@@ -7,6 +7,10 @@
 @section('add_employee_class','active')
 
 
+<style>
+    .erp-num-note { margin: 4px 0 0; font-size: 12px; line-height: 1.4; }
+    .erp-num-note:empty { display: none; }
+</style>
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-bd lobidrag">
@@ -48,7 +52,7 @@
                         <div class="col-sm-4">
                             <input name="au_mobile" class="form-control" type="number" placeholder="Enter Mobile Number" id="phone" required value="{{ old('au_mobile') }}">
                             <p class="text-danger" id="mobile_error_message"></p>
-                            <p class="text-success" id="mobile_available_message"></p>
+                            <p class="erp-num-note" id="mobile_available_message" aria-live="polite"></p>
                         </div>
                     </div>
 
@@ -67,6 +71,7 @@
                         <label for="au_user_id" class="col-sm-2 col-form-div">Employee Id<i class="text-danger">*</i></label>
                         <div class="col-sm-4">
                             <input name="au_user_id" class="form-control" type="number" placeholder="Employee Id" id="au_user_id" required value="{{ old('au_user_id') }}" required>
+                            <p class="erp-num-note" id="code_message" aria-live="polite"></p>
                         </div>
                     </div>
 
@@ -184,32 +189,56 @@
     }
 
     //////// Check Number Availability/////////
+    // A mobile or Employee ID of someone who left (or is turned off) can go to the new employee, who gets a new
+    // record of their own; one that belongs to someone still working cannot. The server checks this again.
 var error_mobile = true;
+var error_code = false;
+var numberCheckUrl = @json(route('hrm.employees.number-check'));
+var numberCheckTimer = null;
+
+function showNumberNote(el, result) {
+    var colour = { free: 'text-success', reuse: 'text-info', inactive: 'text-warning', taken: 'text-danger' }[result.state] || 'text-success';
+    $(el).removeClass('text-success text-info text-warning text-danger').addClass(colour).text(result.text || '');
+}
+
+function checkNumbers() {
+    var mobile = $('#phone').val(), code = $('#au_user_id').val();
+    $.ajax({
+        type: "GET",
+        url: numberCheckUrl,
+        data: { mobile: mobile.length === 11 ? mobile : '', code: code },
+        dataType: 'json',
+        success: function (result) {
+            if ($('#phone').val() !== mobile || $('#au_user_id').val() !== code) { return; }   // the user typed on
+            error_code = result.code.state === 'taken';
+            showNumberNote('#code_message', result.code);
+            if (mobile.length !== 11) { return; }
+            error_mobile = result.mobile.state === 'taken';
+            showNumberNote('#mobile_available_message', result.mobile);
+            if (result.mobile.state === 'free') { $('#mobile_available_message').text('Mobile Number Available'); }
+        }
+    });
+}
+
+function checkNumbersSoon() {
+    clearTimeout(numberCheckTimer);
+    numberCheckTimer = setTimeout(checkNumbers, 300);
+}
+
 $(document).ready(function(){
-    $('#phone').keyup(function(){
-        var mobileno = $(this).val();
-        $.ajax({
-            type: "GET",
-            url: "mobileno_exist",
-            data: { au_mobile: mobileno},
-            success: function (result) {
-                if (error_mobile == false){
-                    if(result == "true") {
-                        error_mobile = true;
-                        $('#mobile_error_message').html('Mobile Number Already Exists');
-                        $('#mobile_available_message').html('');
-                    } else {
-                        error_mobile = false;
-                        $('#mobile_error_message').html('');
-                        $('#mobile_available_message').html('Mobile Number Available');
-                    }
-                }
-            }
-        });
+    $('#phone').on('input', function () {
+        mobilenumerror();
+        checkNumbersSoon();
+    });
+    $('#au_user_id').on('input', function () {
+        error_code = false;
+        $('#code_message').text('');
+        checkNumbersSoon();
     });
 
-    if ($("#phone").val().length > 0) {
+    if ($("#phone").val().length > 0 || $('#au_user_id').val().length > 0) {
         mobilenumerror();
+        checkNumbers();
     }
 });
 
@@ -219,7 +248,7 @@ function mobilenumerror() {
     if (mobile_num_length < 11 || mobile_num_length > 11) {
         error_mobile = true;
         $("#mobile_error_message").html("Invalid Mobile Number");
-        $('#mobile_available_message').html('');
+        $('#mobile_available_message').text('');
     } else {
         error_mobile = false;
         $("#mobile_error_message").html("");
@@ -230,13 +259,12 @@ $("#user_registration_form").submit(function () {
     if (error_mobile == true) {
         $("#phone").focus();
         return false;
+    } else if (error_code == true) {
+        $("#au_user_id").focus();
+        return false;
     } else {
         return true;
     }
-});
-
-$("#phone").keyup(function () {
-    mobilenumerror();
 });
 
 </script>
