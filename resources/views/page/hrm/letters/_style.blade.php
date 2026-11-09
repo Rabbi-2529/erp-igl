@@ -41,9 +41,13 @@
     $ltLinks = [];
     if ($ltFull || $ltHead) { $ltLinks[] = ['hrm.letters.index', 'fa-envelope-o', 'Letters', false]; }
     if ($ltH->isHrExecutive()) { $ltLinks[] = ['hrm.letters.create', 'fa-plus', 'Generate Letter', false]; }
-    if ($ltH->isHrExecutive() && \App\Services\HrmLetterRequests::ready()) {
-        $ltWaiting = (new \App\Services\HrmLetterRequests($ltH))->pendingCount();
-        $ltLinks[] = ['hrm.letters.requests', 'fa-inbox', 'Requests' . ($ltWaiting ? ' (' . $ltWaiting . ')' : ''), false];
+    if ($ltH->isHrExecutive() && class_exists(\App\Services\HrmLetterRequests::class)) {
+        if (\App\Services\HrmLetterRequests::ready()) {
+            $ltWaiting = (new \App\Services\HrmLetterRequests($ltH))->pendingCount();
+            $ltLinks[] = ['hrm.letters.requests', 'fa-inbox', 'Requests' . ($ltWaiting ? ' (' . $ltWaiting . ')' : ''), false];
+        } elseif ($ltH->isHrAdmin()) {
+            $ltLinks[] = ['hrm.letters.requests', 'fa-inbox', 'Requests', false];     // the page says how to switch requests on
+        }
     }
     $ltLinks[] = ['hrm.letters.my', 'fa-user', 'My Letters', false];
     if ($ltFull) {

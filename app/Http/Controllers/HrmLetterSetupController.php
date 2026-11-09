@@ -49,7 +49,7 @@ class HrmLetterSetupController extends Controller
         $fields = HrmLetters::FIELDS;
         $isAdmin = $h->isHrAdmin();
         // which types employees may ask for from My Letters (null until database/hrm_letter_requests.sql has been run)
-        $askable = \App\Services\HrmLetterRequests::ready() ? (new \App\Services\HrmLetterRequests($h))->requestableIds() : null;
+        $askable = class_exists(\App\Services\HrmLetterRequests::class) && \App\Services\HrmLetterRequests::ready() ? (new \App\Services\HrmLetterRequests($h))->requestableIds() : null;
         return view('page.hrm.letters.types', compact('types', 'used', 'fields', 'isAdmin', 'askable'));
     }
 

@@ -271,10 +271,10 @@ class HrmLetterFlow
      * A print or PDF download: counted and kept in the history. The first one by HR turns an approved letter into "issued".
      * Returns the new status.
      */
-    public function markOutput($l, $kind)
+    public function markOutput($l, $kind, $how = '')
     {
         $col = $kind === 'downloaded' ? 'hl_download_count' : 'hl_print_count';
-        return DB::transaction(function () use ($l, $kind, $col) {
+        return DB::transaction(function () use ($l, $kind, $col, $how) {
             $from = DB::table('hrm_letters')->where('hl_id', $l->hl_id)->lockForUpdate()->value('hl_status');   // as it is now, not as it was opened
             $update = [$col => DB::raw($col . ' + 1')];
             $to = $from;
@@ -284,7 +284,7 @@ class HrmLetterFlow
             }
             DB::table('hrm_letters')->where('hl_id', $l->hl_id)->update($update);
             $who = (int) $l->hl_employee_id === (int) Auth::user()->au_id && !$this->canIssue($l) ? ' by the employee' : '';
-            HrmLetters::log($l->hl_id, $kind, ($kind === 'downloaded' ? 'PDF downloaded' : 'Printed') . $who . ($to !== $from ? '; the letter is now issued' : ''), $from, $to);
+            HrmLetters::log($l->hl_id, $kind, ($kind === 'downloaded' ? 'PDF downloaded' : 'Printed') . $how . $who . ($to !== $from ? '; the letter is now issued' : ''), $from, $to);
             return $to;
         });
     }

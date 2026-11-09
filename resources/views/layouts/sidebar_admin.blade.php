@@ -374,7 +374,7 @@ $(document).ready(function () {
                     <ul class="treeview-menu">
                         <li><a href="{{ route('hrm.letters.create') }}">Generate Letter</a></li>
                         <li><a href="{{ route('hrm.letters.index') }}">All Letters</a></li>
-                        @if(\App\Services\HrmLetterRequests::ready())<li><a href="{{ route('hrm.letters.requests') }}">Letter Requests</a></li>@endif
+                        @if(class_exists(\App\Services\HrmLetterRequests::class))<li><a href="{{ route('hrm.letters.requests') }}">Letter Requests</a></li>@endif
                         <li><a href="{{ route('hrm.letters.my') }}">My Letters</a></li>
                         <li><a href="{{ route('hrm.letters.types') }}">Letter Types</a></li>
                         <li><a href="{{ route('hrm.letters.templates') }}">Templates</a></li>

@@ -148,7 +148,7 @@ class HrmLetterController extends Controller
         // letters the employee asked HR for (once database/hrm_letter_requests.sql has been run)
         $requests = collect();
         $requestTypes = collect();
-        if (\App\Services\HrmLetterRequests::ready()) {
+        if (class_exists(\App\Services\HrmLetterRequests::class) && \App\Services\HrmLetterRequests::ready()) {
             $rq = new \App\Services\HrmLetterRequests($h);
             $requests = $rq->query()->where('q.hlq_employee_id', Auth::user()->au_id)->orderByDesc('q.hlq_id')->limit(50)->get();
             $requestTypes = $rq->requestableTypes();
@@ -233,7 +233,7 @@ class HrmLetterController extends Controller
         $deptHead = $l->dep_head_now ? DB::table('admin_user')->where('au_id', $l->dep_head_now)->value('au_name') : null;
         $placeholders = HrmLetterContent::PLACEHOLDERS;
         // what the employee asked for, when the letter was made from their request
-        $asked = \App\Services\HrmLetterRequests::ready()
+        $asked = class_exists(\App\Services\HrmLetterRequests::class) && \App\Services\HrmLetterRequests::ready()
             ? DB::table('hrm_letter_requests')->where('hlq_company_id', $f->letters->company)->where('hlq_letter_id', $l->hl_id)->first() : null;
         return view('page.hrm.letters.letter_show', compact('l', 'pad', 'letter', 'missing', 'unknown', 'history', 'signatories', 'can', 'deptHead', 'placeholders', 'asked'));
     }
@@ -448,45 +448,52 @@ class HrmLetterController extends Controller
     }
 
     /** Called when the letter is printed from the preview: counted, and an approved letter becomes issued */
-    public function printed($id)
+    public function printed(Request $request, $id)
     {
         $f = $this->flow();
         $l = $this->letter($f, $id);
         abort_unless(HrmLetterFlow::printable($l), 403, 'Only an approved letter can be printed.');
-        $status = $f->markOutput($l, 'printed');
+        $status = $f->markOutput($l, 'printed', $request->input('pad') === '0' ? ' on PAD paper (text only)' : '');
         return response()->json(['ok' => true, 'status' => $status, 'label' => HrmLetterFlow::statusLabel($status)]);
     }
 
-    /** The approved letter as an A4 PDF, letterhead header and footer on every page */
-    public function pdf($id)
+    /**
+     * The approved letter as an A4 PDF, letterhead header and footer on every page.
+     * pad=0: text only, for printing on PAD paper (the text stays in the same place, the header and footer are left blank).
+     */
+    public function pdf(Request $request, $id)
     {
         $f = $this->flow();
         $l = $this->letter($f, $id);
         if (!HrmLetterFlow::printable($l)) {
             return $this->back($l)->with('errmsg', 'A PDF can be made only after the letter is approved.');
         }
+        $textOnly = $request->input('pad') === '0';
         [$pad, $letter] = $f->render($l, [], false);
         if (HrmLetterFlow::hasBangla($pad, $letter)) {
             // the PDF maker cannot draw Bangla: the print window's "Save as PDF" does it right (and that print is logged)
-            return redirect()->route('hrm.letters.print', ['id' => $l->hl_id, 'save' => 'pdf']);
+            return redirect()->route('hrm.letters.print', ['id' => $l->hl_id, 'save' => 'pdf'] + ($textOnly ? ['pad' => '0'] : []));
         }
-        $output = $this->makePdf($l, $pad, $letter);
-        $f->markOutput($l, 'downloaded');
+        $output = $this->makePdf($l, $pad, $letter, $textOnly);
+        $f->markOutput($l, 'downloaded', $textOnly ? ' (text only, for PAD paper)' : '');
         return response($output, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . preg_replace('/[^A-Za-z0-9\-]/', '', $l->hl_reference) . '.pdf"',
         ]);
     }
 
-    /** dompdf rendering of a letter; the page numbers are written on each page after the layout is known */
-    public function makePdf($l, $pad, $letter)
+    /**
+     * dompdf rendering of a letter; the page numbers are written on each page after the layout is known.
+     * $textOnly: for PAD paper, the header and footer (and page numbers) are left out but their space is kept.
+     */
+    public function makePdf($l, $pad, $letter, $textOnly = false)
     {
         $wrapper = app('dompdf.wrapper');
         $dompdf = $wrapper->getDomPDF();
         $metrics = $dompdf->getFontMetrics();
         $bands = HrmLetterFlow::pdfBands($pad, $metrics);
         $wrapper->setPaper('a4', 'portrait');
-        $wrapper->loadView('page.hrm.letters.pdf', compact('l', 'pad', 'letter', 'bands'));
+        $wrapper->loadView('page.hrm.letters.pdf', compact('l', 'pad', 'letter', 'bands', 'textOnly'));
         // where dompdf writes the footer line, so the page number sits on the same line
         $footY = null;
         $dompdf->setCallbacks([['event' => 'end_frame', 'f' => function ($frame) use (&$footY) {
@@ -499,7 +506,7 @@ class HrmLetterController extends Controller
         $dompdf->addInfo('Title', $l->hlt_name . ' - ' . $l->hl_reference);
         $dompdf->addInfo('Subject', (string) $letter->subject);
         $dompdf->addInfo('Author', (string) ($pad->company_name ?? ''));
-        if (!empty($pad->page_numbers)) {
+        if (!empty($pad->page_numbers) && !$textOnly) {
             $side = (int) ($pad->margin_side ?? 18) * 72 / 25.4;
             $top = $footY ?? $bands[2];
             $dompdf->getCanvas()->page_script(function ($page, $pages, $canvas, $fm) use ($side, $top) {

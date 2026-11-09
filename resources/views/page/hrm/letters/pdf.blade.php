@@ -24,8 +24,11 @@
 </style>
 </head>
 <body>
+{{-- text only (for PAD paper): no header or footer, but the page margins stay, so the text lands in the same place --}}
+@if(empty($textOnly))
 <div id="head">@include('page.hrm.letters._lh_parts', $parts + ['part' => 'head'])</div>
 <div id="foot">@include('page.hrm.letters._lh_parts', $parts + ['part' => 'foot'])</div>
+@endif
 <div id="letter">
     @include('page.hrm.letters._lh_parts', $parts + ['part' => 'meta'])
     @if(trim($text) !== '')<div class="lh-body">{!! $text !!}</div>@endif

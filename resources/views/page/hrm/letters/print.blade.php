@@ -38,10 +38,21 @@
     .s-foot { flex: 0 0 auto; padding-top: 6px; }
     .wm { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-32deg); font-size: 92pt; font-weight: 700; letter-spacing: 6px;
         color: rgba(196, 22, 31, .14); white-space: nowrap; pointer-events: none; z-index: 5; }
+    /* which paper is in the printer: plain paper (the PAD header and footer are printed) or PAD paper (only the text) */
+    .bar .padsw { display: inline-flex; padding: 0; gap: 0; border: 1px solid #6b746f; border-radius: 4px; overflow: hidden; }
+    .bar .padsw button { border: 0; border-radius: 0; background: #2e3531; }
+    .bar .padsw button + button { border-left: 1px solid #6b746f; }
+    .bar .padsw button[aria-pressed="true"] { background: #0e8a43; }
+    .bar .padsw button:focus-visible { outline: 2px solid #f5dfa0; outline-offset: -2px; }
+    #padNote { display: none; }
+    body.no-pad #padNote { display: inline; }
+    /* on screen the PAD stays faintly visible, to show where the printed PAD paper is; it is not printed */
+    body.no-pad .s-head, body.no-pad .s-foot { opacity: .2; }
     @include('page.hrm.letters._lh_parts', $parts + ['part' => 'css'])
     @media print {
         body { background: #ffffff; }
         .bar { display: none !important; }
+        body.no-pad .s-head, body.no-pad .s-foot { visibility: hidden; opacity: 1; }
         #pages { padding: 0; overflow: visible; zoom: 1 !important; }
         .sheet { margin: 0; box-shadow: none; page-break-after: always; break-after: page; }
         .sheet:last-child { page-break-after: auto; break-after: auto; }
@@ -56,11 +67,16 @@
     <span class="muted">{{ $l->hlt_name }} &middot; {{ $l->employee->name ?? '' }}</span>
     <span class="grow"></span>
     @if($printable)
+        <span class="padsw" role="group" aria-label="Paper in the printer">
+            <button type="button" data-pad="1" aria-pressed="true" title="Plain white paper: the PAD header and footer are printed with the letter">Plain paper</button>
+            <button type="button" data-pad="0" aria-pressed="false" title="Printed PAD paper is in the printer: only the letter text is printed">PAD paper (text only)</button>
+        </span>
+        <span class="note" id="padNote" title="Only the letter text prints. Put the PAD paper in the printer.">Load PAD paper</span>
         <button type="button" class="primary" id="printBtn">&#128424; Print</button>
         @if($bangla)
             <span class="note" id="pdfNote">{{ request('save') === 'pdf' ? 'This letter has Bangla text. To save it as a PDF, click Print and choose "Save as PDF" as the printer.' : 'For a PDF: click Print and choose "Save as PDF".' }}</span>
         @else
-            <form method="POST" action="{{ route('hrm.letters.pdf', $l->hl_id) }}" style="margin: 0;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" id="pdfBtn">&#11015; Download PDF</button></form>
+            <form method="POST" action="{{ route('hrm.letters.pdf', $l->hl_id) }}" style="margin: 0;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="pad" value="1" id="pdfPad"><button type="submit" id="pdfBtn">&#11015; Download PDF</button></form>
         @endif
     @else
         <span class="note">Preview only: {{ [
@@ -231,12 +247,32 @@
     if (document.readyState === 'complete') { settle(); } else { window.addEventListener('load', settle); }
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { if (document.readyState === 'complete') { settle(); } }); }
 
+    // plain paper (PAD printed) or PAD paper (text only); the choice is remembered on this computer.
+    // Only what is shown changes, not the layout: the text stays in the same place on the page.
+    var PAD_KEY = 'erp.letter.pad', withPad = true;
+    function setPad(on, remember) {
+        withPad = on;
+        document.body.classList.toggle('no-pad', !on);
+        Array.prototype.forEach.call(document.querySelectorAll('.padsw button'), function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-pad') === '1') === on)); });
+        var field = document.getElementById('pdfPad'); if (field) { field.value = on ? '1' : '0'; }
+        var pdfBtn = document.getElementById('pdfBtn'); if (pdfBtn) { pdfBtn.innerHTML = on ? '&#11015; Download PDF' : '&#11015; Download PDF (text only)'; }
+        if (remember) { try { localStorage.setItem(PAD_KEY, on ? '1' : '0'); } catch (e) { /* private window: not remembered */ } }
+    }
+    if (printable) {
+        var asked = new URLSearchParams(window.location.search).get('pad'), stored = null;
+        try { stored = localStorage.getItem(PAD_KEY); } catch (e) { /* not available */ }
+        setPad(asked !== null ? asked !== '0' : stored !== '0', false);
+        Array.prototype.forEach.call(document.querySelectorAll('.padsw button'), function (b) {
+            b.addEventListener('click', function () { setPad(b.getAttribute('data-pad') === '1', true); });
+        });
+    }
+
     // every print is counted; the first one by HR marks the letter issued
     var logged = false;
     function logPrint() {
         if (logged || !printable) { return; }
         logged = true;
-        var fd = new FormData(); fd.append('_token', token);
+        var fd = new FormData(); fd.append('_token', token); fd.append('pad', withPad ? '1' : '0');
         if (navigator.sendBeacon) { navigator.sendBeacon(logUrl, fd); } else { var x = new XMLHttpRequest(); x.open('POST', logUrl); x.send(fd); }
     }
     var btn = document.getElementById('printBtn');

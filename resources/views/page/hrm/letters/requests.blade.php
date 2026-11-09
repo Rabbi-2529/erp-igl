@@ -28,6 +28,14 @@
     </div>
 </div>
 
+@if(!empty($setup))
+    <div class="alert alert-warning">
+        <b><i class="fa fa-exclamation-triangle"></i> Letter requests are not switched on in this database yet.</b><br>
+        Run the file <code>database/hrm_letter_requests.sql</code> on this database (for example in phpMyAdmin: choose the ERP database, then Import that file).
+        It only adds two new tables, <code>hrm_letter_requests</code> and <code>hrm_letter_request_types</code>, and changes nothing else.
+        Then reload this page: employees get a <b>Request a letter</b> button on My Letters, and their requests appear here.
+    </div>
+@else
 <div class="rq-tabs">
     <a href="{{ route('hrm.letters.requests', ['show' => 'pending']) }}" class="btn btn-default btn-sm {{ $show === 'pending' ? 'active' : '' }}"><i class="fa fa-inbox"></i> Waiting ({{ $pending }})</a>
     <a href="{{ route('hrm.letters.requests', ['show' => 'all']) }}" class="btn btn-default btn-sm {{ $show === 'all' ? 'active' : '' }}"><i class="fa fa-list"></i> All requests</a>
@@ -89,4 +97,5 @@
         @endif
     </div>
 </div>
+@endif
 @endsection

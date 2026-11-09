@@ -32,6 +32,11 @@ class HrmLetterRequestController extends Controller
 
     public function index(Request $request)
     {
+        if (!HrmLetterRequests::ready()) {
+            // the new tables are not in this database yet: tell the admin how to switch requests on
+            abort_unless(HrmLetters::forUser()->isHrAdmin(), 404);
+            return view('page.hrm.letters.requests', ['setup' => true, 'list' => collect(), 'show' => 'pending', 'term' => '', 'pending' => 0]);
+        }
         $q = $this->requests();
         abort_unless($q->letters->isHrExecutive(), 403, 'Letter requests are handled by HR Admins and HR Executives.');
         $show = in_array($request->input('show'), ['pending', 'all'], true) ? $request->input('show') : 'pending';
