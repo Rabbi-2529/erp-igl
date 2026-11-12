@@ -138,6 +138,58 @@ $(document).ready(function(){
 });
 </script>
 
+<style>
+    /* a number opened from a list (.opener link) stays marked, so after working in the new tab you can see where you were */
+    :root { --erp-opener-last: #fff1b8; --erp-opener-line: #e0a800; }
+    html[data-theme="dark"] { --erp-opener-last: #4a3d10; --erp-opener-line: #f0c040; }
+    .table > tbody > tr.opener-last-row > td { background-color: var(--erp-opener-last) !important; }
+    .table > tbody > tr.opener-last-row > td:first-child { box-shadow: inset 4px 0 0 var(--erp-opener-line); }
+    a.opener.opener-last { font-weight: 700; }
+    a.opener.opener-seen::after { content: "\f00c"; font-family: FontAwesome; font-size: 11px; margin-left: 5px; color: var(--erp-muted); font-weight: normal; }
+    .opener-tag { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 3px; font-size: 11px; line-height: 1.5; white-space: nowrap;
+        background: var(--erp-opener-line); color: #1a1a1a; }
+</style>
+<script>
+// Remembers which numbers were opened from this list today: the last one is highlighted with its row, the others get a tick.
+// Kept per page and per day in this browser (cleared the next day). The links still open exactly as before.
+$(function () {
+    if (!$('a.opener').length) { return; }
+    var d = new Date(), today = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    var KEY = 'erp.opened.' + location.pathname, mem = { day: today, seen: [], last: null };   // mem: used when the browser keeps nothing (private window)
+    function load() {
+        try {
+            var raw = localStorage.getItem(KEY);
+            if (raw === null) { return mem; }
+            var s = JSON.parse(raw);
+            return s && s.day === today && s.seen ? s : { day: today, seen: [], last: null };
+        } catch (e) { return mem; }
+    }
+    function paint() {
+        var s = load();
+        $('a.opener').each(function () {
+            var $a = $(this), k = $a.attr('href'), last = k === s.last;
+            $a.toggleClass('opener-last', last).toggleClass('opener-seen', !last && s.seen.indexOf(k) !== -1);
+            $a.siblings('.opener-tag').remove();
+            if (last) { $a.after('<span class="opener-tag">Last opened</span>'); }
+            $a.closest('tr').toggleClass('opener-last-row', last);
+        });
+    }
+    function remember(a) {
+        var s = load(), k = $(a).attr('href');
+        s.last = k;
+        if (s.seen.indexOf(k) === -1) { s.seen.push(k); if (s.seen.length > 500) { s.seen.shift(); } }
+        mem = s;
+        try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* private window: shown until the page is reloaded */ }
+        paint();
+    }
+    $(document).on('click', 'a.opener', function () { remember(this); });
+    $(document).on('auxclick', 'a.opener', function (e) { if (e.which === 2) { remember(this); } });   // middle click
+    $(document).on('draw.dt', paint);   // next page / search in the table
+    $(window).on('storage', function (e) { if (e.originalEvent && e.originalEvent.key === KEY) { paint(); } });   // same list open in another tab
+    paint();
+});
+</script>
+
 <script>
 $(document).ready(function () {
     $('#search-input').on('input', function () {
